@@ -3,102 +3,84 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Music TV</title>
-
 <style>
-body{
-margin:0;
-background:black;
-font-family:sans-serif;
-}
-
-video{
-width:100%;
-height:100vh;
-object-fit:contain;
-background:black;
-}
-
-#clock{
-position:absolute;
-top:10px;
-right:15px;
-color:white;
-background:rgba(0,0,0,0.6);
-padding:6px 10px;
-border-radius:5px;
-font-size:18px;
-}
+body { margin:0; background:black; font-family:sans-serif; }
+video { width:100%; height:100vh; object-fit:contain; background:black; }
+#clock { position:absolute; top:10px; right:15px; color:white; background:rgba(0,0,0,0.6); padding:6px 10px; border-radius:5px; font-size:18px; }
 </style>
 </head>
-
 <body>
-
 <div id="clock"></div>
-
 <video id="player" autoplay controls preload="auto"></video>
 
 <script>
-
+// Playlist with durations in seconds
 var playlist=[
-{
-url:"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",
-duration:476
-},
-{
-url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4",
-duration:358
-}
+  { url:"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4", duration:476 },
+  { url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4", duration:358 }
 ];
 
-var player=document.getElementById("player");
+var player = document.getElementById("player");
 
-function syncTV(){
-
-let total=0;
-playlist.forEach(v=> total+=v.duration);
-
-let now=Math.floor(Date.now()/1000);
-let pos=now%total;
-
-let index=0;
-
-while(pos>=playlist[index].duration){
-pos-=playlist[index].duration;
-index++;
+// Function to get current video index and position based on time
+function getCurrentVideo(){
+    var total=0;
+    playlist.forEach(v=> total+=v.duration);
+    var now = Math.floor(Date.now()/1000); // seconds
+    var pos = now % total;
+    var index = 0;
+    while(pos >= playlist[index].duration){
+        pos -= playlist[index].duration;
+        index++;
+        if(index >= playlist.length) index = 0;
+    }
+    return {index:index, position:pos};
 }
 
-player.src=playlist[index].url;
-
-player.onloadedmetadata=function(){
-player.currentTime=pos;
-player.play();
+// Function to play video smoothly
+function playSyncVideo(){
+    var current = getCurrentVideo();
+    if(player.src !== playlist[current.index].url){
+        player.src = playlist[current.index].url;
+        player.onloadedmetadata = function(){
+            player.currentTime = current.position;
+            player.play();
+        };
+    } else {
+        // If same video, just adjust currentTime if off
+        if(Math.abs(player.currentTime - current.position) > 1){
+            player.currentTime = current.position;
+        }
+    }
 }
 
-}
+// Initial play
+playSyncVideo();
 
-syncTV();
+// Re-run every 5 seconds to keep everyone in sync
+setInterval(playSyncVideo, 5000);
 
-setInterval(syncTV,10000);
-
-player.addEventListener("ended",function(){
-syncTV();
+// Event listener for ended to immediately switch video
+player.addEventListener("ended", function(){
+    var nextIndex = playlist.findIndex(v=>v.url === player.src) + 1;
+    if(nextIndex >= playlist.length) nextIndex = 0;
+    player.src = playlist[nextIndex].url;
+    player.onloadedmetadata = function(){
+        player.currentTime = 0;
+        player.play();
+    };
 });
 
+// Live clock
 function updateClock(){
-
-var n=new Date();
-
-var h=String(n.getHours()).padStart(2,"0");
-var m=String(n.getMinutes()).padStart(2,"0");
-var s=String(n.getSeconds()).padStart(2,"0");
-
-document.getElementById("clock").innerHTML=h+":"+m+":"+s;
-
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,"0");
+    var m = String(now.getMinutes()).padStart(2,"0");
+    var s = String(now.getSeconds()).padStart(2,"0");
+    document.getElementById("clock").innerHTML = h+":"+m+":"+s;
 }
-
 setInterval(updateClock,1000);
 
 </script>
-
 </body>
 </html>
