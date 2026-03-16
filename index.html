@@ -55,32 +55,49 @@ var player=document.getElementById("player");
 
 function syncTV(){
 
-var total=0;
+let total=0;
 
 playlist.forEach(v=>{
 total+=v.duration;
 });
 
-var now=Math.floor(Date.now()/1000);
+let now=Math.floor(Date.now()/1000);
 
-var position=now%total;
+let t=now%total;
 
-var index=0;
+let index=0;
 
-while(position>=playlist[index].duration){
+while(t>=playlist[index].duration){
 
-position-=playlist[index].duration;
+t-=playlist[index].duration;
 index++;
 
+if(index>=playlist.length){
+index=0;
+break;
 }
+
+}
+
+if(player.src!==playlist[index].url){
 
 player.src=playlist[index].url;
 
 player.onloadedmetadata=function(){
 
-player.currentTime=position;
+player.currentTime=t;
 
 player.play();
+
+}
+
+}else{
+
+if(Math.abs(player.currentTime-t)>3){
+
+player.currentTime=t;
+
+}
 
 }
 
@@ -88,15 +105,15 @@ player.play();
 
 syncTV();
 
-setInterval(syncTV,15000);
+setInterval(syncTV,10000);
 
 function updateClock(){
 
-var now=new Date();
+var n=new Date();
 
-var h=String(now.getHours()).padStart(2,"0");
-var m=String(now.getMinutes()).padStart(2,"0");
-var s=String(now.getSeconds()).padStart(2,"0");
+var h=String(n.getHours()).padStart(2,"0");
+var m=String(n.getMinutes()).padStart(2,"0");
+var s=String(n.getSeconds()).padStart(2,"0");
 
 document.getElementById("clock").innerHTML=h+":"+m+":"+s;
 
