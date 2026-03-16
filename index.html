@@ -65,19 +65,24 @@ index++
 
 player.src=playlist[index].url
 
-player.addEventListener("loadedmetadata",function(){
+player.onloadedmetadata=function(){
 
 player.currentTime=time
-
 player.play()
 
-})
+}
 
 }
 
 startTV()
 
-setInterval(startTV,10000)
+player.onended=function(){
+
+startTV()
+
+}
+
+setInterval(startTV,15000)
 
 </script>
 
