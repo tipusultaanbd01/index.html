@@ -1,76 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Music TV Final</title>
+<meta charset="utf-8">
+<title>Locked Loop TV</title>
 <style>
-body { margin:0; background:black; font-family:sans-serif; }
-video { width:100%; height:100vh; object-fit:contain; background:black; }
-#clock { position:absolute; top:10px; right:15px; color:white; background:rgba(0,0,0,0.6); padding:6px 10px; border-radius:5px; font-size:18px; }
+body { margin:0; background:black; }
+video { width:100%; height:100vh; object-fit:contain; pointer-events:none; }
+#clock { position:absolute; top:10px; right:10px; color:white; background:rgba(0,0,0,0.6); padding:5px 10px; border-radius:5px; font-size:16px; }
 </style>
 </head>
 <body>
 
 <div id="clock"></div>
-
-<video id="player" autoplay controls preload="auto"></video>
+<video id="player" autoplay muted></video>
 
 <script>
-
-// Playlist with durations in seconds
+// Playlist with MP4 URLs
 var playlist = [
-  { url:"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4", duration:476 },
-  { url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4", duration:358 }
+  "https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",
+  "https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4"
 ];
 
-var player = document.getElementById("player");
+var index = 0;
+var player = document.getElementById('player');
 
-// Get current video and position based on absolute time
-function getCurrentVideo(){
-    var total = 0;
-    playlist.forEach(v=> total += v.duration);
-    var now = Math.floor(Date.now()/1000);
-    var t = now % total;
-    var index = 0;
-    while(t >= playlist[index].duration){
-        t -= playlist[index].duration;
-        index++;
-        if(index >= playlist.length) index = 0;
-    }
-    return { index: index, position: t };
-}
+// Lock player controls and autoplay
+player.controls = false;
+player.autoplay = true;
+player.muted = false;
 
-// Play video at correct time
-function playSyncVideo(){
-    var current = getCurrentVideo();
-    if(player.src !== playlist[current.index].url){
-        player.src = playlist[current.index].url;
-        player.onloadedmetadata = function(){
-            player.currentTime = current.position;
-            player.play();
-        };
-    } else {
-        if(Math.abs(player.currentTime - current.position) > 1){
-            player.currentTime = current.position;
-        }
-    }
-}
-
-// Initial play
-playSyncVideo();
-
-// Keep syncing every 5 seconds
-setInterval(playSyncVideo, 5000);
-
-// Handle ended event to loop properly
-player.addEventListener("ended", function(){
-    var currentIndex = playlist.findIndex(v => v.url === player.src);
-    var nextIndex = currentIndex + 1;
-    if(nextIndex >= playlist.length) nextIndex = 0;
-    player.src = playlist[nextIndex].url;
+// Play current video
+function playVideo(i){
+    player.src = playlist[i];
     player.load();
     player.play();
+}
+
+// When video ends, play next video
+player.addEventListener('ended', function(){
+    index++;
+    if(index >= playlist.length) index = 0;
+    playVideo(index);
 });
+
+// Start first video
+playVideo(index);
 
 // Live clock
 function updateClock(){
@@ -81,29 +55,10 @@ function updateClock(){
     document.getElementById("clock").innerHTML = h + ":" + m + ":" + s;
 }
 setInterval(updateClock, 1000);
-
 </script>
 
 </body>
-</html>// keep sync
-setInterval(syncTV,10000);
-
-// ultra smooth loop
-player.addEventListener("ended",function(){
-
-index++;
-
-if(index>=playlist.length){
-index=0;
-}
-
-player.src=playlist[index].url;
-
-player.load();
-
-player.play();
-
-});
+</html>});
 
 // live clock
 function updateClock(){
