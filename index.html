@@ -40,61 +40,61 @@ font-size:18px;
 <script>
 
 var playlist=[
-"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",
-"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4"
+{
+url:"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",
+duration:476
+},
+{
+url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4",
+duration:358
+}
 ];
 
 var player=document.getElementById("player");
 
-var index=0;
+function syncTV(){
 
-var preloadVideo=document.createElement("video");
+let total=0;
 
-function startVideo(){
-
-player.src=playlist[index];
-player.play();
-
-var next=index+1;
-
-if(next>=playlist.length){
-next=0;
-}
-
-preloadVideo.src=playlist[next];
-
-}
-
-startVideo();
-
-player.addEventListener("ended",function(){
-
-index++;
-
-if(index>=playlist.length){
-index=0;
-}
-
-player.src=playlist[index];
-player.play();
-
-var next=index+1;
-
-if(next>=playlist.length){
-next=0;
-}
-
-preloadVideo.src=playlist[next];
-
+playlist.forEach(v=>{
+total+=v.duration;
 });
+
+let now=Math.floor(Date.now()/1000);
+
+let t=now%total;
+
+let index=0;
+
+while(t>=playlist[index].duration){
+t-=playlist[index].duration;
+index++;
+}
+
+if(player.src!==playlist[index].url){
+
+player.src=playlist[index].url;
+
+player.onloadedmetadata=function(){
+player.currentTime=t;
+player.play();
+}
+
+}
+
+}
+
+syncTV();
+
+setInterval(syncTV,5000);
 
 function updateClock(){
 
-var now=new Date();
+var n=new Date();
 
-var h=String(now.getHours()).padStart(2,"0");
-var m=String(now.getMinutes()).padStart(2,"0");
-var s=String(now.getSeconds()).padStart(2,"0");
+var h=String(n.getHours()).padStart(2,"0");
+var m=String(n.getMinutes()).padStart(2,"0");
+var s=String(n.getSeconds()).padStart(2,"0");
 
 document.getElementById("clock").innerHTML=h+":"+m+":"+s;
 
@@ -104,6 +104,8 @@ setInterval(updateClock,1000);
 
 </script>
 
+</body>
+</html>
 </body>
 </html>
 </script>
