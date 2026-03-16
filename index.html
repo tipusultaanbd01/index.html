@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Music TV Sync Loop</title>
+<title>Fast Music TV Loop</title>
 <style>
 body { margin:0; background:black; overflow:hidden; }
 video { width:100%; height:100vh; object-fit:contain; pointer-events:none; background:black; }
@@ -29,7 +29,7 @@ var playlist = [
 ];
 
 var player = document.getElementById('player');
-player.controls = false;  // lock controls
+player.controls = false;
 
 // --- Fullscreen toggle ---
 document.getElementById('fsBtn').addEventListener('click', function(){
@@ -49,47 +49,49 @@ soundBtn.addEventListener('click', function(){
     soundBtn.innerText = soundOn ? "Sound On" : "Sound Off";
 });
 
-// --- Time-synced playback ---
+// --- Time-synced ultra fast playback ---
 function getCurrentVideo() {
-    let totalDuration = playlist.reduce((a,b)=>a+b.duration,0);
+    let total = playlist.reduce((a,b)=>a+b.duration,0);
     let now = Math.floor(Date.now()/1000);
-    let pos = now % totalDuration;
-    let index = 0;
-    while(pos >= playlist[index].duration){
-        pos -= playlist[index].duration;
-        index++;
-        if(index >= playlist.length) index = 0;
+    let pos = now % total;
+    let idx = 0;
+    while(pos >= playlist[idx].duration){
+        pos -= playlist[idx].duration;
+        idx++;
+        if(idx >= playlist.length) idx = 0;
     }
-    return {index:index, position:pos};
+    return {index:idx, position:pos};
 }
 
-function syncVideo() {
-    let current = getCurrentVideo();
-    if(player.src !== playlist[current.index].url){
-        player.src = playlist[current.index].url;
-        player.onloadedmetadata = function(){
-            player.currentTime = current.position;
-            player.play();
-        };
+var currentIndex = -1;
+
+// Ultra-fast sync function
+function fastSync() {
+    let cur = getCurrentVideo();
+    if(currentIndex !== cur.index){
+        currentIndex = cur.index;
+        player.src = playlist[cur.index].url;
+        player.currentTime = cur.position;
+        player.play().catch(()=>{}); // ignore promise error
     } else {
-        if(Math.abs(player.currentTime - current.position) > 1){
-            player.currentTime = current.position;
+        // minor drift correction
+        if(Math.abs(player.currentTime - cur.position) > 0.5){
+            player.currentTime = cur.position;
         }
     }
 }
 
-// Initial play
-syncVideo();
-setInterval(syncVideo, 5000);
+// Start fast sync every 1 second
+fastSync();
+setInterval(fastSync, 1000);
 
-// Loop next video
+// Video ended event → next video
 player.addEventListener("ended", function(){
-    let current = getCurrentVideo();
-    let nextIndex = current.index + 1;
-    if(nextIndex >= playlist.length) nextIndex = 0;
-    player.src = playlist[nextIndex].url;
-    player.load();
-    player.play();
+    currentIndex++;
+    if(currentIndex >= playlist.length) currentIndex = 0;
+    player.src = playlist[currentIndex].url;
+    player.currentTime = 0;
+    player.play().catch(()=>{});
 });
 
 // Live clock
@@ -104,4 +106,5 @@ setInterval(updateClock,1000);
 </script>
 
 </body>
+</html></body>
 </html>
