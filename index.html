@@ -10,7 +10,7 @@ body{
   font-family:sans-serif;
 }
 
-/* video container for fade effect */
+/* video container */
 #video-container{
   width:100%;
   height:100vh;
@@ -25,6 +25,7 @@ video{
   top:0;
   left:0;
   transition:opacity 1s ease-in-out;
+  preload:auto;
 }
 
 /* logo */
@@ -54,7 +55,7 @@ video{
   z-index:10;
 }
 
-/* loading spinner */
+/* loader */
 #loader{
   position:absolute;
   top:50%;
@@ -68,7 +69,6 @@ video{
   animation:spin 1s linear infinite;
   z-index:5;
 }
-
 @keyframes spin{
   0%{transform:translate(-50%,-50%) rotate(0deg)}
   100%{transform:translate(-50%,-50%) rotate(360deg)}
@@ -82,12 +82,11 @@ video{
 <div id="loader"></div>
 
 <div id="video-container">
-  <video id="player1" autoplay playsinline></video>
-  <video id="player2" autoplay playsinline style="opacity:0"></video>
+  <video id="player1" autoplay playsinline preload="auto"></video>
+  <video id="player2" autoplay playsinline preload="auto" style="opacity:0"></video>
 </div>
 
 <script>
-// ভিডিও লিস্ট
 const videos=[
   {
     src:"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",
@@ -100,10 +99,74 @@ const videos=[
 ]
 
 let totalDuration = videos.reduce((a,v)=>a+v.duration,0)
-
 const player1 = document.getElementById("player1")
 const player2 = document.getElementById("player2")
 let currentPlayer = player1
+
+function startChannel(){
+  const now = Math.floor(Date.now()/1000)
+  let position = now % totalDuration
+  let currentVideo=0
+  let time=position
+
+  for(let i=0;i<videos.length;i++){
+    if(time < videos[i].duration){
+      currentVideo = i
+      break
+    }
+    time -= videos[i].duration
+  }
+
+  const nextPlayer = currentPlayer===player1 ? player2 : player1
+
+  // Stop old video fully
+  currentPlayer.pause()
+  currentPlayer.src = ""
+  currentPlayer.currentTime = 0
+  currentPlayer.style.opacity = 0
+
+  // Preload next video before fade
+  if(nextPlayer.src !== videos[currentVideo].src){
+    nextPlayer.src = videos[currentVideo].src
+    document.getElementById("loader").style.display="block"
+  }
+
+  nextPlayer.oncanplaythrough = ()=>{
+    nextPlayer.currentTime = time
+    nextPlayer.play()
+    nextPlayer.style.opacity = 1
+    currentPlayer.style.opacity = 0
+    currentPlayer = nextPlayer
+    document.getElementById("loader").style.display="none"
+  }
+}
+
+// কম সময়ে সিঙ্ক চেক করে smooth loop
+startChannel()
+setInterval(startChannel,5000)
+
+// Clock
+function updateClock(){
+  const now = new Date()
+  let h=now.getHours(), m=now.getMinutes(), s=now.getSeconds()
+  if(h<10) h="0"+h
+  if(m<10) m="0"+m
+  if(s<10) s="0"+s
+  document.getElementById("clock").innerText = h+":"+m+":"+s
+}
+setInterval(updateClock,1000)
+updateClock()
+
+// Auto fullscreen
+document.body.onclick = function(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen()
+  }
+}
+</script>
+
+</body>
+</html>let currentPlayer = player1
 
 // ভিডিও সিঙ্ক ফাংশন
 function startChannel(){
