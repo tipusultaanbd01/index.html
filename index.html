@@ -4,14 +4,21 @@
 <meta charset="utf-8">
 <title>Music TV Sync Loop</title>
 <style>
-body { margin:0; background:black; }
-video { width:100%; height:100vh; object-fit:contain; pointer-events:none; }
+body { margin:0; background:black; overflow:hidden; }
+video { width:100%; height:100vh; object-fit:contain; pointer-events:none; background:black; }
 #clock { position:absolute; top:10px; right:10px; color:white; background:rgba(0,0,0,0.6); padding:5px 10px; border-radius:5px; font-size:16px; }
+#controls { position:absolute; top:10px; left:10px; }
+button { margin-right:5px; padding:5px 10px; font-size:14px; }
 </style>
 </head>
 <body>
 
 <div id="clock"></div>
+<div id="controls">
+<button id="fsBtn">Fullscreen</button>
+<button id="soundBtn">Sound On</button>
+</div>
+
 <video id="player" autoplay muted></video>
 
 <script>
@@ -22,10 +29,29 @@ var playlist = [
 ];
 
 var player = document.getElementById('player');
+player.controls = false;  // lock controls
 
-// --- Calculate which video + position based on absolute time ---
+// --- Fullscreen toggle ---
+document.getElementById('fsBtn').addEventListener('click', function(){
+    if(!document.fullscreenElement){
+        document.documentElement.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
+});
+
+// --- Sound toggle ---
+var soundOn = false;
+var soundBtn = document.getElementById('soundBtn');
+soundBtn.addEventListener('click', function(){
+    soundOn = !soundOn;
+    player.muted = !soundOn;
+    soundBtn.innerText = soundOn ? "Sound On" : "Sound Off";
+});
+
+// --- Time-synced playback ---
 function getCurrentVideo() {
-    let totalDuration = playlist.reduce((a,b)=>a+b.duration, 0);
+    let totalDuration = playlist.reduce((a,b)=>a+b.duration,0);
     let now = Math.floor(Date.now()/1000);
     let pos = now % totalDuration;
     let index = 0;
@@ -37,7 +63,6 @@ function getCurrentVideo() {
     return {index:index, position:pos};
 }
 
-// --- Play video at correct position ---
 function syncVideo() {
     let current = getCurrentVideo();
     if(player.src !== playlist[current.index].url){
@@ -47,7 +72,6 @@ function syncVideo() {
             player.play();
         };
     } else {
-        // Drift correction
         if(Math.abs(player.currentTime - current.position) > 1){
             player.currentTime = current.position;
         }
@@ -56,11 +80,9 @@ function syncVideo() {
 
 // Initial play
 syncVideo();
-
-// Keep syncing every 5 sec
 setInterval(syncVideo, 5000);
 
-// When video ends, move to next video
+// Loop next video
 player.addEventListener("ended", function(){
     let current = getCurrentVideo();
     let nextIndex = current.index + 1;
@@ -70,7 +92,7 @@ player.addEventListener("ended", function(){
     player.play();
 });
 
-// --- Live clock ---
+// Live clock
 function updateClock(){
     let now = new Date();
     let h = String(now.getHours()).padStart(2,"0");
