@@ -13,6 +13,8 @@ overflow:hidden;
 font-family:sans-serif;
 }
 
+/* video */
+
 video{
 width:100%;
 height:100vh;
@@ -20,18 +22,53 @@ object-fit:contain;
 background:#000;
 }
 
-/* Clock */
+/* clock */
 
 #clock{
 position:fixed;
 top:10px;
-left:15px;
+right:15px;
 color:white;
 font-size:22px;
-background:rgba(0,0,0,0.5);
+background:rgba(0,0,0,0.6);
 padding:6px 12px;
 border-radius:6px;
 z-index:10;
+}
+
+/* logo */
+
+#logo{
+position:fixed;
+top:10px;
+left:15px;
+z-index:10;
+}
+
+#logo img{
+height:40px;
+}
+
+/* loading spinner */
+
+#loader{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+border:6px solid #333;
+border-top:6px solid white;
+border-radius:50%;
+width:50px;
+height:50px;
+animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+
+0%{transform:translate(-50%,-50%) rotate(0deg)}
+100%{transform:translate(-50%,-50%) rotate(360deg)}
+
 }
 
 </style>
@@ -39,7 +76,13 @@ z-index:10;
 
 <body>
 
+<div id="logo">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Logo_TV_2015.png/512px-Logo_TV_2015.png">
+</div>
+
 <div id="clock"></div>
+
+<div id="loader"></div>
 
 <video id="player" autoplay playsinline></video>
 
@@ -92,8 +135,13 @@ time-=videos[i].duration
 player.src=videos[currentVideo].src
 
 player.onloadedmetadata=()=>{
+
 player.currentTime=time
+
+document.getElementById("loader").style.display="none"
+
 player.play()
+
 }
 
 }
@@ -102,7 +150,7 @@ startChannel()
 
 setInterval(startChannel,30000)
 
-/* Clock */
+/* clock */
 
 function updateClock(){
 
@@ -112,9 +160,9 @@ let h=now.getHours()
 let m=now.getMinutes()
 let s=now.getSeconds()
 
-if(h<10) h="0"+h
-if(m<10) m="0"+m
-if(s<10) s="0"+s
+if(h<10)h="0"+h
+if(m<10)m="0"+m
+if(s<10)s="0"+s
 
 document.getElementById("clock").innerText=h+":"+m+":"+s
 
@@ -124,23 +172,19 @@ setInterval(updateClock,1000)
 
 updateClock()
 
-</script>
+/* auto fullscreen */
 
-</body>
-</html>
-await player.requestPictureInPicture()
+document.body.onclick=function(){
+
+if(!document.fullscreenElement){
+
+document.documentElement.requestFullscreen()
+
+}
 
 }
 
 </script>
 
 </body>
-</html>player.addEventListener('contextmenu', e => e.preventDefault());
-</script>
-
-</body>
-</html></script>
-
-</body>
-</html></body>
 </html>
