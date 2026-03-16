@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Music TV</title>
+<title>Music TV Live</title>
 
 <style>
 body{
@@ -13,8 +13,8 @@ background:black;
 video{
 width:100%;
 height:100vh;
-background:black;
 object-fit:contain;
+background:black;
 }
 </style>
 
@@ -27,28 +27,58 @@ object-fit:contain;
 <script>
 
 var playlist = [
-"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",
-"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4"
+
+{
+url:"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",
+duration:476
+},
+
+{
+url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4",
+duration:358
+}
+
 ];
 
-var player = document.getElementById("player");
-var index = 0;
+var player=document.getElementById("player");
 
-function playVideo(i){
-player.src = playlist[i];
-player.load();
-player.play();
-}
+var totalDuration=0;
 
-player.addEventListener("ended", function(){
-index++;
-if(index >= playlist.length){
-index = 0;
-}
-playVideo(index);
+playlist.forEach(function(v){
+totalDuration+=v.duration;
 });
 
-playVideo(index);
+var now=Math.floor(Date.now()/1000);
+var position=now%totalDuration;
+
+var currentVideo=0;
+
+while(position>=playlist[currentVideo].duration){
+position-=playlist[currentVideo].duration;
+currentVideo++;
+}
+
+player.src=playlist[currentVideo].url;
+
+player.addEventListener("loadedmetadata",function(){
+
+player.currentTime=position;
+player.play();
+
+});
+
+player.addEventListener("ended",function(){
+
+currentVideo++;
+
+if(currentVideo>=playlist.length){
+currentVideo=0;
+}
+
+player.src=playlist[currentVideo].url;
+player.play();
+
+});
 
 </script>
 
