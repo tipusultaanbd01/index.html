@@ -35,7 +35,7 @@ font-size:18px;
 
 <div id="clock"></div>
 
-<video id="player" autoplay controls></video>
+<video id="player" autoplay controls preload="auto"></video>
 
 <script>
 
@@ -55,38 +55,34 @@ var player=document.getElementById("player");
 function syncTV(){
 
 let total=0;
-
-playlist.forEach(v=>{
-total+=v.duration;
-});
+playlist.forEach(v=> total+=v.duration);
 
 let now=Math.floor(Date.now()/1000);
-
-let t=now%total;
+let pos=now%total;
 
 let index=0;
 
-while(t>=playlist[index].duration){
-t-=playlist[index].duration;
+while(pos>=playlist[index].duration){
+pos-=playlist[index].duration;
 index++;
 }
-
-if(player.src!==playlist[index].url){
 
 player.src=playlist[index].url;
 
 player.onloadedmetadata=function(){
-player.currentTime=t;
+player.currentTime=pos;
 player.play();
-}
-
 }
 
 }
 
 syncTV();
 
-setInterval(syncTV,5000);
+setInterval(syncTV,10000);
+
+player.addEventListener("ended",function(){
+syncTV();
+});
 
 function updateClock(){
 
@@ -102,12 +98,6 @@ document.getElementById("clock").innerHTML=h+":"+m+":"+s;
 
 setInterval(updateClock,1000);
 
-</script>
-
-</body>
-</html>
-</body>
-</html>
 </script>
 
 </body>
