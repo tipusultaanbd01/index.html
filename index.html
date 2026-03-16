@@ -10,6 +10,7 @@ body{
 margin:0;
 background:#000;
 overflow:hidden;
+font-family:sans-serif;
 }
 
 video{
@@ -19,11 +20,26 @@ object-fit:contain;
 background:#000;
 }
 
-</style>
+/* Clock */
 
+#clock{
+position:fixed;
+top:10px;
+left:15px;
+color:white;
+font-size:22px;
+background:rgba(0,0,0,0.5);
+padding:6px 12px;
+border-radius:6px;
+z-index:10;
+}
+
+</style>
 </head>
 
 <body>
+
+<div id="clock"></div>
 
 <video id="player" autoplay playsinline></video>
 
@@ -86,24 +102,32 @@ startChannel()
 
 setInterval(startChannel,30000)
 
+/* Clock */
+
+function updateClock(){
+
+const now=new Date()
+
+let h=now.getHours()
+let m=now.getMinutes()
+let s=now.getSeconds()
+
+if(h<10) h="0"+h
+if(m<10) m="0"+m
+if(s<10) s="0"+s
+
+document.getElementById("clock").innerText=h+":"+m+":"+s
+
+}
+
+setInterval(updateClock,1000)
+
+updateClock()
+
 </script>
 
 </body>
 </html>
-function toggleSound(){
-
-player.muted=!player.muted
-
-}
-
-function fullscreen(){
-
-player.requestFullscreen()
-
-}
-
-async function pip(){
-
 await player.requestPictureInPicture()
 
 }
