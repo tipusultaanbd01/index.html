@@ -15,35 +15,17 @@ overflow:hidden;
 video{
 width:100%;
 height:100vh;
-object-fit:cover;
-}
-
-.controls{
-position:fixed;
-top:10px;
-right:10px;
-z-index:10;
-}
-
-button{
-padding:8px;
-margin:3px;
+object-fit:contain;
+background:#000;
 }
 
 </style>
+
 </head>
 
 <body>
 
 <video id="player" autoplay playsinline></video>
-
-<div class="controls">
-
-<button onclick="toggleSound()">Sound</button>
-<button onclick="pip()">PIP</button>
-<button onclick="fullscreen()">Full</button>
-
-</div>
 
 <script>
 
@@ -104,6 +86,10 @@ startChannel()
 
 setInterval(startChannel,30000)
 
+</script>
+
+</body>
+</html>
 function toggleSound(){
 
 player.muted=!player.muted
