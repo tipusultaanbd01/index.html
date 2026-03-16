@@ -5,9 +5,12 @@
 <title>Music TV Live</title>
 
 <style>
+
 body{
 margin:0;
 background:black;
+color:white;
+font-family:sans-serif;
 }
 
 video{
@@ -16,17 +19,43 @@ height:100vh;
 object-fit:contain;
 background:black;
 }
-</style>
 
+#clock{
+position:absolute;
+top:10px;
+right:15px;
+font-size:18px;
+background:rgba(0,0,0,0.5);
+padding:5px 10px;
+border-radius:5px;
+}
+
+#fullscreen{
+position:absolute;
+bottom:20px;
+right:20px;
+background:red;
+color:white;
+border:none;
+padding:10px 15px;
+font-size:16px;
+border-radius:5px;
+}
+
+</style>
 </head>
 
 <body>
 
-<video id="player" controls autoplay></video>
+<div id="clock"></div>
+
+<video id="player" autoplay controls></video>
+
+<button id="fullscreen">Fullscreen</button>
 
 <script>
 
-var playlist = [
+var playlist=[
 
 {
 url:"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",
@@ -42,7 +71,7 @@ duration:358
 
 var player=document.getElementById("player");
 
-function startTV(){
+function syncTV(){
 
 var total=0;
 
@@ -74,15 +103,39 @@ player.play()
 
 }
 
-startTV()
+syncTV()
 
 player.onended=function(){
 
-startTV()
+syncTV()
 
 }
 
-setInterval(startTV,15000)
+setInterval(syncTV,20000)
+
+function updateClock(){
+
+var now=new Date()
+
+var h=now.getHours().toString().padStart(2,"0")
+var m=now.getMinutes().toString().padStart(2,"0")
+var s=now.getSeconds().toString().padStart(2,"0")
+
+document.getElementById("clock").innerText=h+":"+m+":"+s
+
+}
+
+setInterval(updateClock,1000)
+
+document.getElementById("fullscreen").onclick=function(){
+
+var video=document.getElementById("player")
+
+if(video.requestFullscreen){
+video.requestFullscreen()
+}
+
+}
 
 </script>
 
