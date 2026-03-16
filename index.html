@@ -1,109 +1,131 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Looping Video Player</title>
+
 <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: #000;
-    height: 100%;
-    overflow: hidden;
-  }
-  #video-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-  }
-  video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  #controls {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 10;
-    display: flex;
-    gap: 10px;
-  }
-  button {
-    padding: 8px 12px;
-    font-size: 14px;
-    background: rgba(255,255,255,0.2);
-    border: none;
-    color: #fff;
-    cursor: pointer;
-  }
-  button:hover {
-    background: rgba(255,255,255,0.5);
-  }
+
+body{
+margin:0;
+background:#000;
+overflow:hidden;
+}
+
+video{
+width:100%;
+height:100vh;
+object-fit:cover;
+}
+
+.controls{
+position:fixed;
+top:10px;
+right:10px;
+z-index:10;
+}
+
+button{
+padding:8px;
+margin:3px;
+}
+
 </style>
 </head>
+
 <body>
 
-<div id="video-container">
-  <video id="player" autoplay muted playsinline></video>
-  <div id="controls">
-    <button id="sound-toggle">Sound On</button>
-    <button id="pip-btn">PiP</button>
-    <button id="fullscreen-btn">Fullscreen</button>
-  </div>
+<video id="player" autoplay playsinline></video>
+
+<div class="controls">
+
+<button onclick="toggleSound()">Sound</button>
+<button onclick="pip()">PIP</button>
+<button onclick="fullscreen()">Full</button>
+
 </div>
 
 <script>
-const videos = [
-  "https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",
-  "https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4"
-];
 
-let currentIndex = 0;
-const player = document.getElementById("player");
-const soundBtn = document.getElementById("sound-toggle");
-const pipBtn = document.getElementById("pip-btn");
-const fullscreenBtn = document.getElementById("fullscreen-btn");
+const videos=[
 
-// Load first video
-player.src = videos[currentIndex];
-player.muted = false;
-player.autoplay = true;
+{
+src:"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",
+duration:250
+},
 
-// Loop videos
-player.addEventListener('ended', () => {
-  currentIndex = (currentIndex + 1) % videos.length;
-  player.src = videos[currentIndex];
-  player.play();
-});
+{
+src:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4",
+duration:240
+}
 
-// Sound toggle
-soundBtn.addEventListener('click', () => {
-  player.muted = !player.muted;
-  soundBtn.textContent = player.muted ? "Sound Off" : "Sound On";
-});
+]
 
-// Fullscreen
-fullscreenBtn.addEventListener('click', async () => {
-  if (!document.fullscreenElement) {
-    await document.documentElement.requestFullscreen();
-  } else {
-    await document.exitFullscreen();
-  }
-});
+const player=document.getElementById("player")
 
-// PiP
-pipBtn.addEventListener('click', async () => {
-  if (document.pictureInPictureElement) {
-    await document.exitPictureInPicture();
-  } else {
-    await player.requestPictureInPicture();
-  }
-});
+let totalDuration=0
 
-// Disable right-click on video
-player.addEventListener('contextmenu', e => e.preventDefault());
+videos.forEach(v=>{
+totalDuration+=v.duration
+})
+
+function startChannel(){
+
+let now=Math.floor(Date.now()/1000)
+
+let position=now%totalDuration
+
+let currentVideo=0
+let time=position
+
+for(let i=0;i<videos.length;i++){
+
+if(time<videos[i].duration){
+
+currentVideo=i
+break
+
+}
+
+time-=videos[i].duration
+
+}
+
+player.src=videos[currentVideo].src
+
+player.onloadedmetadata=()=>{
+player.currentTime=time
+player.play()
+}
+
+}
+
+startChannel()
+
+setInterval(startChannel,30000)
+
+function toggleSound(){
+
+player.muted=!player.muted
+
+}
+
+function fullscreen(){
+
+player.requestFullscreen()
+
+}
+
+async function pip(){
+
+await player.requestPictureInPicture()
+
+}
+
+</script>
+
+</body>
+</html>player.addEventListener('contextmenu', e => e.preventDefault());
 </script>
 
 </body>
