@@ -74,8 +74,6 @@ animation:spin 1s linear infinite;
 
 <script>
 
-// ভিডিও লিস্ট
-
 const videos=[
 
 {
@@ -96,6 +94,11 @@ duration:90
 {
 src:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na%20_%20Coke%20Studio%20Bangla%20_%20Season%202%20_%20Shiblu%20Mredha%20X%20Aleya%20Begum%20X%20Emon%20Chowdhury.mp4",
 duration:347
+},
+
+{
+src:"https://ia600406.us.archive.org/27/items/animes-roy-bhaber-deshe-thako-konna-bari-siddiqui-animes-roy/Animes%20Roy%20-%20%E0%A6%AD%E0%A6%BE%E0%A6%AC%E0%A7%87%E0%A6%B0%20%E0%A6%A6%E0%A7%87%E0%A6%B6%E0%A7%87%20%E0%A6%A5%E0%A6%BE%E0%A6%95%E0%A7%8B%20%E0%A6%95%E0%A6%A8%E0%A7%8D%E0%A6%AF%E0%A6%BE%EF%BD%9C%EF%BD%9Cbhaber%20deshe%20thako%20konna%EF%BD%9C%EF%BD%9C%20Bari%20Siddiqui%20%EF%BD%9C%EF%BD%9CAnimes%20Roy.webm",
+duration:295
 }
 
 ]
@@ -104,6 +107,85 @@ const player=document.getElementById("player")
 
 let totalDuration=0
 videos.forEach(v=> totalDuration+=v.duration)
+
+function startChannel(){
+
+let now=Math.floor(Date.now()/1000)
+let position=now%totalDuration
+
+let currentVideo=0
+let time=position
+
+for(let i=0;i<videos.length;i++){
+
+if(time<videos[i].duration){
+currentVideo=i
+break
+}
+
+time-=videos[i].duration
+
+}
+
+if(player.src!==videos[currentVideo].src){
+
+player.src=videos[currentVideo].src
+document.getElementById("loader").style.display="block"
+
+}
+
+player.onloadedmetadata=function(){
+
+player.currentTime=time
+document.getElementById("loader").style.display="none"
+player.play()
+
+}
+
+}
+
+startChannel()
+setInterval(startChannel,30000)
+
+function updateClock(){
+
+const now=new Date()
+
+let h=now.getHours()
+let m=now.getMinutes()
+let s=now.getSeconds()
+
+if(h<10) h="0"+h
+if(m<10) m="0"+m
+if(s<10) s="0"+s
+
+document.getElementById("clock").innerText=h+":"+m+":"+s
+
+}
+
+setInterval(updateClock,1000)
+updateClock()
+
+document.body.onclick=function(){
+
+if(!document.fullscreenElement){
+
+document.documentElement.requestFullscreen()
+
+}
+
+}
+
+player.onended=function(){
+
+startChannel()
+
+}
+
+</script>
+
+</body>
+</html>videos.forEach(v=> totalDuration+=v.duration)
 
 function startChannel(){
 
