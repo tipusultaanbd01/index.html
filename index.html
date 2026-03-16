@@ -73,7 +73,6 @@ video{
   0%{transform:translate(-50%,-50%) rotate(0deg)}
   100%{transform:translate(-50%,-50%) rotate(360deg)}
 }
-
 </style>
 </head>
 <body>
@@ -100,14 +99,13 @@ const videos=[
   }
 ]
 
-let totalDuration = 0
-videos.forEach(v=> totalDuration += v.duration)
+let totalDuration = videos.reduce((a,v)=>a+v.duration,0)
 
 const player1 = document.getElementById("player1")
 const player2 = document.getElementById("player2")
 let currentPlayer = player1
 
-// ভিডিও প্লে ফাংশন
+// ভিডিও সিঙ্ক ফাংশন
 function startChannel(){
   const now = Math.floor(Date.now()/1000)
   let position = now % totalDuration
@@ -124,6 +122,11 @@ function startChannel(){
 
   const nextPlayer = currentPlayer===player1 ? player2 : player1
 
+  // আগের ভিডিও stop এবং sound reset
+  currentPlayer.pause()
+  currentPlayer.currentTime = 0
+  currentPlayer.src = ""
+
   if(nextPlayer.src !== videos[currentVideo].src){
     nextPlayer.src = videos[currentVideo].src
     document.getElementById("loader").style.display="block"
@@ -139,8 +142,9 @@ function startChannel(){
   }
 }
 
+// প্রতি 10 সেকেন্ডে সিঙ্ক চেক (loop delay কমানো)
 startChannel()
-setInterval(startChannel,30000)
+setInterval(startChannel,10000)
 
 // Clock
 function updateClock(){
@@ -160,7 +164,6 @@ document.body.onclick = function(){
     document.documentElement.requestFullscreen()
   }
 }
-
 </script>
 
 </body>
