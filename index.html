@@ -42,43 +42,42 @@ duration:358
 
 var player=document.getElementById("player");
 
-var totalDuration=0;
+function startTV(){
 
-playlist.forEach(function(v){
-totalDuration+=v.duration;
-});
+var total=0;
 
-var now=Math.floor(Date.now()/1000);
-var position=now%totalDuration;
+playlist.forEach(v=>{
+total+=v.duration
+})
 
-var currentVideo=0;
+var now=Math.floor(Date.now()/1000)
 
-while(position>=playlist[currentVideo].duration){
-position-=playlist[currentVideo].duration;
-currentVideo++;
+var time=now%total
+
+var index=0
+
+while(time>=playlist[index].duration){
+
+time-=playlist[index].duration
+index++
+
 }
 
-player.src=playlist[currentVideo].url;
+player.src=playlist[index].url
 
 player.addEventListener("loadedmetadata",function(){
 
-player.currentTime=position;
-player.play();
+player.currentTime=time
 
-});
+player.play()
 
-player.addEventListener("ended",function(){
+})
 
-currentVideo++;
-
-if(currentVideo>=playlist.length){
-currentVideo=0;
 }
 
-player.src=playlist[currentVideo].url;
-player.play();
+startTV()
 
-});
+setInterval(startTV,10000)
 
 </script>
 
