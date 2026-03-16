@@ -30,18 +30,6 @@ padding:5px 10px;
 border-radius:5px;
 }
 
-#fullscreen{
-position:absolute;
-bottom:20px;
-right:20px;
-background:red;
-color:white;
-border:none;
-padding:10px 15px;
-font-size:16px;
-border-radius:5px;
-}
-
 </style>
 </head>
 
@@ -50,8 +38,6 @@ border-radius:5px;
 <div id="clock"></div>
 
 <video id="player" autoplay controls></video>
-
-<button id="fullscreen">Fullscreen</button>
 
 <script>
 
@@ -104,6 +90,33 @@ player.play()
 }
 
 syncTV()
+
+player.onended=function(){
+
+syncTV()
+
+}
+
+setInterval(syncTV,20000)
+
+function updateClock(){
+
+var now=new Date()
+
+var h=now.getHours().toString().padStart(2,"0")
+var m=now.getMinutes().toString().padStart(2,"0")
+var s=now.getSeconds().toString().padStart(2,"0")
+
+document.getElementById("clock").innerText=h+":"+m+":"+s
+
+}
+
+setInterval(updateClock,1000)
+
+</script>
+
+</body>
+</html>syncTV()
 
 player.onended=function(){
 
