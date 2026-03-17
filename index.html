@@ -2,108 +2,136 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-
-body{
-margin:0;
-background:#000;
-overflow:hidden;
-font-family:sans-serif;
+body {
+  margin:0;
+  background:#000;
+  font-family:sans-serif;
+  overflow:hidden;
+  height:100vh;
 }
 
-video{
-width:100%;
-height:100vh;
-object-fit:contain;
-background:#000;
+video {
+  width:100%;
+  height:100vh;
+  object-fit:contain;
+  background:#000;
+  display:block;
 }
 
-/* Logo */
-
-#logo{
-position:fixed;
-top:10px;
-left:15px;
-color:#00ffe5;
-font-size:26px;
-font-weight:bold;
-background:rgba(0,0,0,0.6);
-padding:6px 12px;
-border-radius:6px;
-z-index:10;
+#infoBox{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.5);
+  padding:10px 18px;
+  border-radius:10px;
+  color:white;
+  text-align:center;
+  z-index:10;
 }
 
-/* Clock */
-
-#clock{
-position:fixed;
-top:10px;
-right:15px;
-color:white;
-font-size:22px;
-background:rgba(0,0,0,0.6);
-padding:6px 12px;
-border-radius:6px;
-z-index:10;
-}
-
-/* Now Playing */
-
-#now{
-position:fixed;
-bottom:60px;
-left:15px;
-color:white;
-font-size:18px;
-background:rgba(0,0,0,0.6);
-padding:6px 12px;
-border-radius:6px;
-z-index:10;
-}
-
-/* Next Playing */
-
-#next{
-position:fixed;
-bottom:25px;
-left:15px;
-color:#00ffe5;
-font-size:16px;
-background:rgba(0,0,0,0.6);
-padding:6px 12px;
-border-radius:6px;
-z-index:10;
-}
-
-/* Loader */
+#now{ color:red; font-size:16px; margin-bottom:4px; }
+#next{ color:#00ffe5; font-size:15px; margin-bottom:4px; }
+#after{ color:yellow; font-size:15px; }
 
 #loader{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-border:6px solid #333;
-border-top:6px solid white;
-border-radius:50%;
-width:50px;
-height:50px;
-animation:spin 1s linear infinite;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  border:6px solid #333;
+  border-top:6px solid #fff;
+  border-radius:50%;
+  width:50px;
+  height:50px;
+  animation: spin 1s linear infinite;
+  display:none;
+  z-index:20;
 }
 
 @keyframes spin{
-0%{transform:translate(-50%,-50%) rotate(0deg)}
-100%{transform:translate(-50%,-50%) rotate(360deg)}
+  0%{transform:rotate(0deg);}
+  100%{transform:rotate(360deg);}
 }
-
 </style>
 </head>
-
 <body>
 
-<div id="logo">Boom TV</div>
-<div id="clock"></div>
+<div id="infoBox">
+  <div id="now"></div>
+  <div id="next"></div>
+  <div id="after"></div>
+</div>
 
+<div id="loader"></div>
+
+<video id="player" autoplay playsinline controls></video>
+
+<script>
+// ভিডিও লিস্ট
+const videos = [
+  {name:"Rakkhosh Trailer", src:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm", duration:130 },
+  {name:"Tere Mast Mast Do Nain", src:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4", duration:240 },
+  {name:"Bonolota Express Trailer", src:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4", duration:90 },
+  {name:"Kotha Koiyo Na", src:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na%20_%20Coke%20Studio%20Bangla%20_%20Season%202%20_%20Shiblu%20Mredha%20X%20Aleya%20Begum%20X%20Emon%20Chowdhury.mp4", duration:347 },
+  {name:"Bhober Deshe Thako Konna", src:"https://ia600406.us.archive.org/27/items/animes-roy-bhaber-deshe-thako-konna-bari-siddiqui-animes-roy/Animes%20Roy%20-%20%E0%A6%AD%E0%A6%BE%E0%A6%AC%E0%A7%87%E0%A6%B0%20%E0%A6%A6%E0%A7%87%E0%A6%B6%E0%A7%87%20%E0%A6%A5%E0%A6%BE%E0%A6%95%E0%A7%8B%20%E0%A6%95%E0%A6%A8%E0%A7%8D%E0%A6%AF%E0%A6%BE.webm", duration:295 }
+];
+
+const player = document.getElementById("player");
+const loader = document.getElementById("loader");
+
+// total duration
+let totalDuration = videos.reduce((acc,v)=>acc+v.duration,0);
+
+function startChannel(){
+  const nowSec = Math.floor(Date.now()/1000); // বর্তমান সময়
+  let position = nowSec % totalDuration; // loop time
+
+  let currentVideoIndex = 0;
+  let timeOffset = position;
+
+  for(let i=0;i<videos.length;i++){
+    if(timeOffset < videos[i].duration){
+      currentVideoIndex = i;
+      break;
+    }
+    timeOffset -= videos[i].duration;
+  }
+
+  let nextIndex = (currentVideoIndex+1)%videos.length;
+  let afterIndex = (currentVideoIndex+2)%videos.length;
+
+  // Overlay
+  document.getElementById("now").innerText = "Now Playing: " + videos[currentVideoIndex].name;
+  document.getElementById("next").innerText = "Next: " + videos[nextIndex].name;
+  document.getElementById("after").innerText = "After: " + videos[afterIndex].name;
+
+  // Load video
+  if(player.src !== videos[currentVideoIndex].src){
+    loader.style.display = "block";
+    player.src = videos[currentVideoIndex].src;
+  }
+
+  player.onloadedmetadata = function(){
+    player.currentTime = timeOffset;
+    loader.style.display = "none";
+    player.play();
+  }
+}
+
+// শুরুতে এবং প্রতি 30 সেকেন্ডে সিঙ্ক
+startChannel();
+setInterval(startChannel, 30000);
+
+// ভিডিও শেষ হলে স্বয়ংক্রিয়ভাবে
+player.onended = function(){
+  startChannel();
+}
+</script>
+</body>
+</html>
 <div id="now"></div>
 <div id="next"></div>
 
