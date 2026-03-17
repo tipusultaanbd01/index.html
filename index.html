@@ -2,6 +2,9 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <style>
 html, body {
   margin:0;
@@ -27,7 +30,7 @@ html, body {
   left:15px;
   color:white;
   background:rgba(0,0,0,0.6);
-  padding:10px 15px;
+  padding:10px;
   border-radius:8px;
   z-index:10;
 }
@@ -48,7 +51,6 @@ html, body {
   height:50px;
   animation: spin 1s linear infinite;
   display:none;
-  z-index:20;
 }
 
 @keyframes spin{
@@ -102,7 +104,39 @@ const videos=[
 const player=document.getElementById("player");
 const loader=document.getElementById("loader");
 
+let hls;
 let total=videos.reduce((a,b)=>a+b.duration,0);
+
+function playVideo(url){
+
+  loader.style.display="block";
+
+  if(hls){
+    hls.destroy();
+  }
+
+  if(url.includes(".m3u8")){
+    if(Hls.isSupported()){
+      hls=new Hls({
+        maxBufferLength:10
+      });
+      hls.loadSource(url);
+      hls.attachMedia(player);
+      hls.on(Hls.Events.MANIFEST_PARSED,function(){
+        loader.style.display="none";
+        player.play();
+      });
+    } else {
+      player.src=url;
+    }
+  } else {
+    player.src=url;
+    player.onloadeddata=function(){
+      loader.style.display="none";
+      player.play();
+    }
+  }
+}
 
 function start(){
 
@@ -122,16 +156,19 @@ function start(){
   document.getElementById("next").innerText="Next: "+videos[next].name;
   document.getElementById("after").innerText="After: "+videos[after].name;
 
-  if(player.src!==videos[i].src){
-    loader.style.display="block";
-    player.src=videos[i].src;
+  if(player.getAttribute("data-src")!==videos[i].src){
+    player.setAttribute("data-src",videos[i].src);
+    playVideo(videos[i].src);
   }
+}
 
-  player.onloadedmetadata=function(){
-    player.currentTime=pos;
-    loader.style.display="none";
-    player.play();
-  }
+start();
+setInterval(start,30000);
+
+</script>
+
+</body>
+</html>  }
 
 }
 
