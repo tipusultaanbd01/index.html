@@ -10,7 +10,6 @@ body {
   overflow:hidden;
   height:100vh;
 }
-
 video {
   width:100%;
   height:100vh;
@@ -18,7 +17,6 @@ video {
   background:#000;
   display:block;
 }
-
 #infoBox{
   position:fixed;
   bottom:20px;
@@ -31,11 +29,9 @@ video {
   text-align:center;
   z-index:10;
 }
-
 #now{ color:red; font-size:16px; margin-bottom:4px; }
 #next{ color:#00ffe5; font-size:15px; margin-bottom:4px; }
 #after{ color:yellow; font-size:15px; }
-
 #loader{
   position:absolute;
   top:50%;
@@ -49,8 +45,8 @@ video {
   animation: spin 1s linear infinite;
   display:none;
   z-index:20;
+  background:#000;
 }
-
 @keyframes spin{
   0%{transform:rotate(0deg);}
   100%{transform:rotate(360deg);}
@@ -81,29 +77,53 @@ const videos = [
 
 const player = document.getElementById("player");
 const loader = document.getElementById("loader");
-
-// total duration
 let totalDuration = videos.reduce((acc,v)=>acc+v.duration,0);
 
 function startChannel(){
-  const nowSec = Math.floor(Date.now()/1000); // বর্তমান সময়
-  let position = nowSec % totalDuration; // loop time
+  const nowSec = Math.floor(Date.now()/1000);
+  let pos = nowSec % totalDuration;
 
-  let currentVideoIndex = 0;
-  let timeOffset = position;
+  let currentIndex = 0;
+  let offset = pos;
 
   for(let i=0;i<videos.length;i++){
-    if(timeOffset < videos[i].duration){
-      currentVideoIndex = i;
+    if(offset < videos[i].duration){
+      currentIndex = i;
       break;
     }
-    timeOffset -= videos[i].duration;
+    offset -= videos[i].duration;
   }
 
-  let nextIndex = (currentVideoIndex+1)%videos.length;
-  let afterIndex = (currentVideoIndex+2)%videos.length;
+  let nextIndex = (currentIndex+1)%videos.length;
+  let afterIndex = (currentIndex+2)%videos.length;
 
-  // Overlay
+  document.getElementById("now").innerText = "Now Playing: "+videos[currentIndex].name;
+  document.getElementById("next").innerText = "Next: "+videos[nextIndex].name;
+  document.getElementById("after").innerText = "After: "+videos[afterIndex].name;
+
+  if(player.src !== videos[currentIndex].src){
+    loader.style.display = "block";
+    player.src = videos[currentIndex].src;
+  }
+
+  player.onloadedmetadata = function(){
+    player.currentTime = offset;
+    loader.style.display = "none";
+    player.play().catch(()=>{}); // auto-play restriction handled
+  }
+}
+
+// শুরুতে এবং প্রতি 30 সেকেন্ডে সিঙ্ক
+startChannel();
+setInterval(startChannel,30000);
+
+// ভিডিও শেষ হলে স্বয়ংক্রিয়ভাবে
+player.onended = function(){
+  startChannel();
+}
+</script>
+</body>
+</html>  // Overlay
   document.getElementById("now").innerText = "Now Playing: " + videos[currentVideoIndex].name;
   document.getElementById("next").innerText = "Next: " + videos[nextIndex].name;
   document.getElementById("after").innerText = "After: " + videos[afterIndex].name;
