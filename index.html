@@ -3,19 +3,18 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-
 body {
   margin:0;
   background:#000;
-  overflow:hidden;
   font-family:sans-serif;
+  overflow:hidden;
   height:100vh;
 }
 
 video {
   width:100%;
   height:100vh;
-  object-fit:contain;
+  object-fit:contain; /* ভিডিও জুম/ক্রপ হবে না */
   background:#000;
   display:block;
 }
@@ -33,20 +32,9 @@ video {
   z-index:10;
 }
 
-#now{
-  color:red;
-  font-size:16px;
-}
-
-#next{
-  color:#00ffe5;
-  font-size:15px;
-}
-
-#after{
-  color:yellow;
-  font-size:15px;
-}
+#now{ color:red; font-size:16px; margin-bottom:4px; }
+#next{ color:#00ffe5; font-size:15px; margin-bottom:4px; }
+#after{ color:yellow; font-size:15px; }
 
 #loader{
   position:absolute;
@@ -59,15 +47,14 @@ video {
   width:50px;
   height:50px;
   animation: spin 1s linear infinite;
-  background:#000;
+  display:none; /* শুধু লোডিং সময় দেখাবে */
   z-index:20;
 }
 
 @keyframes spin{
-  0%{transform:translate(-50%, -50%) rotate(0deg);}
-  100%{transform:translate(-50%, -50%) rotate(360deg);}
+  0%{transform:rotate(0deg);}
+  100%{transform:rotate(360deg);}
 }
-
 </style>
 </head>
 <body>
@@ -80,10 +67,10 @@ video {
 
 <div id="loader"></div>
 
-<video id="player" autoplay playsinline muted></video>
+<video id="player" autoplay playsinline controls></video>
 
 <script>
-
+// ভিডিও লিস্ট
 const videos = [
   {name:"Rakkhosh Trailer", src:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm"},
   {name:"Tere Mast Mast Do Nain", src:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4"},
@@ -103,7 +90,29 @@ function updateOverlay() {
   document.getElementById("after").innerText = "After: " + videos[(currentIndex+2)%videos.length].name;
 }
 
-function loadVideo(index) {
+function loadVideo(index){
+  loader.style.display = "block";
+  player.src = videos[index].src;
+  player.load();
+  updateOverlay();
+}
+
+player.oncanplay = function(){
+  loader.style.display = "none";
+  player.play();
+}
+
+player.onended = function(){
+  currentIndex = (currentIndex+1) % videos.length;
+  loadVideo(currentIndex);
+}
+
+// প্রথম ভিডিও লোড
+loadVideo(currentIndex);
+
+</script>
+</body>
+</html>function loadVideo(index) {
   loader.style.display = "block";
   player.src = videos[index].src;
   player.load();
