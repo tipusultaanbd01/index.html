@@ -2,7 +2,6 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
 body{
   margin:0;
@@ -16,8 +15,9 @@ video{
   width:100%;
   height:100vh;
   object-fit:contain; /* ভিডিও জুম/ক্রপ হবে না */
-  background:#000; /* লোডিং সময় কালো ব্যাকগ্রাউন্ড */
+  background:#000; /* লোডিং কালো ব্যাকগ্রাউন্ড */
   display:block;
+  preload:metadata;
 }
 
 #logo{
@@ -51,30 +51,18 @@ video{
   left:50%;
   transform:translateX(-50%);
   color:white;
-  background:rgba(0,0,0,0.5);
+  background:rgba(0,0,0,0.4);
   padding:10px 15px;
   border-radius:10px;
   z-index:10;
   text-align:center;
   font-family:sans-serif;
+  animation: floatOverlay 10s linear infinite;
 }
 
-#now{
-  color:red;
-  font-size:16px;
-  margin-bottom:4px;
-}
-
-#next{
-  color:#00ffe5;
-  font-size:15px;
-  margin-bottom:4px;
-}
-
-#after{
-  color:yellow;
-  font-size:15px;
-}
+#now{ color:red; font-size:16px; margin-bottom:4px; }
+#next{ color:#00ffe5; font-size:15px; margin-bottom:4px; }
+#after{ color:yellow; font-size:15px; }
 
 #loader{
   position:absolute;
@@ -87,13 +75,19 @@ video{
   width:50px;
   height:50px;
   animation:spin 1s linear infinite;
-  background:#000; /* লোডিং সময় কালো */
+  background:#000;
   z-index:20;
 }
 
 @keyframes spin{
   0%{transform:translate(-50%,-50%) rotate(0deg)}
   100%{transform:translate(-50%,-50%) rotate(360deg)}
+}
+
+@keyframes floatOverlay{
+  0%{transform:translateX(-50%) translateY(0);}
+  50%{transform:translateX(-50%) translateY(-5px);}
+  100%{transform:translateX(-50%) translateY(0);}
 }
 </style>
 </head>
@@ -120,74 +114,73 @@ const videos=[
 { name:"Bonolota Express Trailer", src:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4", duration:90 },
 { name:"Kotha Koiyo Na", src:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na%20_%20Coke%20Studio%20Bangla%20_%20Season%202%20_%20Shiblu%20Mredha%20X%20Aleya%20Begum%20X%20Emon%20Chowdhury.mp4", duration:347 },
 { name:"Bhober Deshe Thako Konna", src:"https://ia600406.us.archive.org/27/items/animes-roy-bhaber-deshe-thako-konna-bari-siddiqui-animes-roy/Animes%20Roy%20-%20%E0%A6%AD%E0%A6%BE%E0%A6%AC%E0%A7%87%E0%A6%B0%20%E0%A6%A6%E0%A7%87%E0%A6%B6%E0%A7%87%20%E0%A6%A5%E0%A6%BE%E0%A6%95%E0%A7%8B%20%E0%A6%95%E0%A6%A8%E0%A7%8D%E0%A6%AF%E0%A6%BE.webm", duration:295 }
-]
+];
 
-const player=document.getElementById("player")
-const loader=document.getElementById("loader")
+const player=document.getElementById("player");
+const loader=document.getElementById("loader");
 
-let totalDuration=0
-videos.forEach(v=> totalDuration+=v.duration)
+let totalDuration=0;
+videos.forEach(v=> totalDuration+=v.duration);
 
 function startChannel(){
-  let now=Math.floor(Date.now()/1000)
-  let position=now%totalDuration
+  let now=Math.floor(Date.now()/1000);
+  let position=now%totalDuration;
 
-  let currentVideo=0
-  let time=position
+  let currentVideo=0;
+  let time=position;
 
   for(let i=0;i<videos.length;i++){
     if(time<videos[i].duration){
-      currentVideo=i
-      break
+      currentVideo=i;
+      break;
     }
-    time-=videos[i].duration
+    time-=videos[i].duration;
   }
 
-  let next=(currentVideo+1)%videos.length
-  let after=(currentVideo+2)%videos.length
+  let next=(currentVideo+1)%videos.length;
+  let after=(currentVideo+2)%videos.length;
 
-  document.getElementById("now").innerText="Now Playing: "+videos[currentVideo].name
-  document.getElementById("next").innerText="Next: "+videos[next].name
-  document.getElementById("after").innerText="After: "+videos[after].name
+  document.getElementById("now").innerText="Now Playing: "+videos[currentVideo].name;
+  document.getElementById("next").innerText="Next: "+videos[next].name;
+  document.getElementById("after").innerText="After: "+videos[after].name;
 
   if(player.src!==videos[currentVideo].src){
-    loader.style.display="block"
-    player.src=videos[currentVideo].src
+    loader.style.display="block";
+    player.src=videos[currentVideo].src;
   }
 
   player.onloadedmetadata=function(){
-    player.currentTime=time
-    loader.style.display="none"
-    player.play()
+    player.currentTime=time;
+    loader.style.display="none";
+    player.play();
   }
 }
 
-startChannel()
-setInterval(startChannel,30000)
+startChannel();
+setInterval(startChannel,30000);
 
 /* Clock */
 function updateClock(){
-  const now=new Date()
-  let h=now.getHours(), m=now.getMinutes(), s=now.getSeconds()
-  if(h<10) h="0"+h
-  if(m<10) m="0"+m
-  if(s<10) s="0"+s
-  document.getElementById("clock").innerText=h+":"+m+":"+s
+  const now=new Date();
+  let h=now.getHours(), m=now.getMinutes(), s=now.getSeconds();
+  if(h<10) h="0"+h;
+  if(m<10) m="0"+m;
+  if(s<10) s="0"+s;
+  document.getElementById("clock").innerText=h+":"+m+":"+s;
 }
-setInterval(updateClock,1000)
-updateClock()
+setInterval(updateClock,1000);
+updateClock();
 
 /* Fullscreen on touch */
 document.body.onclick=function(){
   if(!document.fullscreenElement){
-    document.documentElement.requestFullscreen()
+    document.documentElement.requestFullscreen();
   }
 }
 
 player.onended=function(){
-  startChannel()
+  startChannel();
 }
-
 </script>
 </body>
 </html>
