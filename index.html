@@ -2,108 +2,109 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-html,body{
+body{
   margin:0;
-  padding:0;
   background:#000;
-  height:100%;
-  overflow:hidden;
+  height:100vh;
 }
-
-#player{
-  position:fixed;
+video{
   width:100%;
   height:100%;
   object-fit:contain;
   background:#000;
 }
-
-#playBtn{
-  position:fixed;
+#btn{
+  position:absolute;
   top:50%;
   left:50%;
   transform:translate(-50%,-50%);
   padding:15px 25px;
   font-size:20px;
   background:red;
-  color:#fff;
+  color:white;
   border:none;
   border-radius:8px;
-  z-index:30;
-}
-
-#infoBox{
-  position:fixed;
-  bottom:20px;
-  left:15px;
-  color:white;
-  background:rgba(0,0,0,0.6);
-  padding:10px;
-  border-radius:8px;
-}
-
-#loader{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%, -50%);
-  border:6px solid #333;
-  border-top:6px solid #fff;
-  border-radius:50%;
-  width:50px;
-  height:50px;
-  animation: spin 1s linear infinite;
-  display:none;
-}
-
-@keyframes spin{
-  100%{transform:rotate(360deg);}
 }
 </style>
 </head>
 <body>
 
-<video id="player" playsinline></video>
-
-<button id="playBtn">▶ Play</button>
-
-<div id="infoBox">
-  <div id="now"></div>
-  <div id="next"></div>
-  <div id="after"></div>
-</div>
-
-<div id="loader"></div>
+<video id="v" controls playsinline></video>
+<button id="btn">▶ Play</button>
 
 <script>
 
-const videos=[
-  {
-    name:"Rakkhosh Trailer",
-    src:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH.webm",
-    duration:130
-  },
-  {
-    name:"Tere Mast Mast Do Nain",
-    src:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain.mp4",
-    duration:240
-  }
+const videos = [
+"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm",
+
+"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4",
+
+"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express.mp4",
+
+"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na.mp4",
+
+"https://ia600406.us.archive.org/27/items/animes-roy-bhaber-deshe-thako-konna-bari-siddiqui-animes-roy/Animes%20Roy%20-%20Bhober%20Deshe%20Thako%20Konna.webm",
+
+// test m3u8 (live tv example)
+"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
 ];
 
-const player=document.getElementById("player");
-const loader=document.getElementById("loader");
-const btn=document.getElementById("playBtn");
-
+let index = 0;
 let hls;
-let total=videos.reduce((a,b)=>a+b.duration,0);
 
-function playVideo(url){
+const v = document.getElementById("v");
+const btn = document.getElementById("btn");
 
-  loader.style.display="block";
+btn.onclick = function(){
+  btn.style.display="none";
+  playVideo();
+}
 
+function playVideo(){
+
+  let url = videos[index];
+
+  // destroy old hls
+  if(hls){
+    hls.destroy();
+  }
+
+  // m3u8
+  if(url.includes(".m3u8")){
+    if(Hls.isSupported()){
+      hls = new Hls();
+      hls.loadSource(url);
+      hls.attachMedia(v);
+      hls.on(Hls.Events.MANIFEST_PARSED, function(){
+        v.play();
+      });
+    } else {
+      v.src = url;
+      v.play();
+    }
+  }
+
+  // normal video
+  else{
+    v.src = url;
+    v.play();
+  }
+
+  v.onended = function(){
+    index++;
+    if(index >= videos.length) index = 0;
+    playVideo();
+  }
+}
+
+</script>
+
+</body>
+</html>
   if(hls){ hls.destroy(); }
 
   if(url.includes(".m3u8")){
