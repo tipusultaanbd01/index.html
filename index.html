@@ -55,13 +55,19 @@ background:rgba(0,0,0,0.6);
 padding:10px 15px;
 border-radius:8px;
 z-index:10;
-transition:opacity .5s;
+opacity:1;
 }
 
 #next{
 color:#00ffe5;
 font-size:15px;
 margin-top:5px;
+}
+
+#after{
+color:#ffaa00;
+font-size:14px;
+margin-top:3px;
 }
 
 #loader{
@@ -93,6 +99,7 @@ animation:spin 1s linear infinite;
 <div id="infoBox">
 <div id="now"></div>
 <div id="next"></div>
+<div id="after"></div>
 </div>
 
 <div id="loader"></div>
@@ -136,7 +143,6 @@ duration:295
 ]
 
 const player=document.getElementById("player")
-const infoBox=document.getElementById("infoBox")
 
 let totalDuration=0
 videos.forEach(v=> totalDuration+=v.duration)
@@ -150,40 +156,29 @@ let currentVideo=0
 let time=position
 
 for(let i=0;i<videos.length;i++){
-
 if(time<videos[i].duration){
 currentVideo=i
 break
 }
-
 time-=videos[i].duration
-
 }
 
 let next=(currentVideo+1)%videos.length
+let after=(currentVideo+2)%videos.length
 
 document.getElementById("now").innerText="Now Playing: "+videos[currentVideo].name
 document.getElementById("next").innerText="Next: "+videos[next].name
-
-infoBox.style.opacity="1"
-
-setTimeout(()=>{
-infoBox.style.opacity="0"
-},5000)
+document.getElementById("after").innerText="After: "+videos[after].name
 
 if(player.src!==videos[currentVideo].src){
-
 player.src=videos[currentVideo].src
 document.getElementById("loader").style.display="block"
-
 }
 
 player.onloadedmetadata=function(){
-
 player.currentTime=time
 document.getElementById("loader").style.display="none"
 player.play()
-
 }
 
 }
@@ -194,9 +189,7 @@ setInterval(startChannel,30000)
 /* Clock */
 
 function updateClock(){
-
 const now=new Date()
-
 let h=now.getHours()
 let m=now.getMinutes()
 let s=now.getSeconds()
@@ -206,26 +199,17 @@ if(m<10) m="0"+m
 if(s<10) s="0"+s
 
 document.getElementById("clock").innerText=h+":"+m+":"+s
-
 }
 
 setInterval(updateClock,1000)
 updateClock()
 
-/* Touch show info */
+/* Fullscreen on touch */
 
 document.body.onclick=function(){
-
-infoBox.style.opacity="1"
-
-setTimeout(()=>{
-infoBox.style.opacity="0"
-},5000)
-
 if(!document.fullscreenElement){
 document.documentElement.requestFullscreen()
 }
-
 }
 
 player.onended=function(){
