@@ -16,7 +16,6 @@ width:100%;
 height:100vh;
 object-fit:contain;
 background:#000;
-transition:opacity .4s;
 }
 
 #logo{
@@ -55,8 +54,8 @@ border-radius:8px;
 z-index:10;
 }
 
-#next{color:#00ffe5;font-size:15px;margin-top:5px;}
-#after{color:#ffaa00;font-size:14px;margin-top:3px;}
+#next{color:#00ffe5;margin-top:5px;}
+#after{color:#ffaa00;margin-top:3px;}
 
 #loader{
 position:absolute;
@@ -91,19 +90,90 @@ animation:spin 1s linear infinite;
 
 <div id="loader"></div>
 
-<video id="player" autoplay playsinline></video>
+<video id="player" autoplay muted playsinline></video>
 
 <script>
 
 const videos=[
-
 {
-name:"Rakkhosh Trailer",
-src:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm",
-duration:130
+name:"Sample 1",
+src:"https://www.w3schools.com/html/mov_bbb.mp4",
+duration:10
 },
-
 {
+name:"Sample 2",
+src:"https://www.w3schools.com/html/movie.mp4",
+duration:10
+}
+]
+
+const player=document.getElementById("player")
+
+let totalDuration=0
+videos.forEach(v=> totalDuration+=v.duration)
+
+function startChannel(){
+
+let now=Math.floor(Date.now()/1000)
+let position=now%totalDuration
+
+let index=0
+let time=position
+
+for(let i=0;i<videos.length;i++){
+if(time<videos[i].duration){
+index=i
+break
+}
+time-=videos[i].duration
+}
+
+let next=(index+1)%videos.length
+let after=(index+2)%videos.length
+
+document.getElementById("now").innerText="Now Playing: "+videos[index].name
+document.getElementById("next").innerText="Next: "+videos[next].name
+document.getElementById("after").innerText="After: "+videos[after].name
+
+player.src=videos[index].src
+
+player.onloadeddata=function(){
+document.getElementById("loader").style.display="none"
+player.currentTime=time
+
+player.play().catch(()=>{
+// autoplay block হলে click এ play হবে
+})
+
+}
+
+}
+
+startChannel()
+
+setInterval(startChannel,20000)
+
+/* Clock */
+setInterval(()=>{
+const d=new Date()
+document.getElementById("clock").innerText=
+d.toLocaleTimeString()
+},1000)
+
+/* Click to unmute + fullscreen */
+document.body.onclick=function(){
+player.muted=false
+player.play()
+
+if(!document.fullscreenElement){
+document.documentElement.requestFullscreen()
+}
+}
+
+</script>
+
+</body>
+</html>{
 name:"Tere Mast Mast Do Nain",
 src:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4",
 duration:240
