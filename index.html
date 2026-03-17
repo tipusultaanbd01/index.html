@@ -2,11 +2,10 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-html, body {
+html,body{
   margin:0;
   padding:0;
   background:#000;
@@ -14,14 +13,26 @@ html, body {
   overflow:hidden;
 }
 
-#player {
+#player{
   position:fixed;
-  top:0;
-  left:0;
   width:100%;
   height:100%;
   object-fit:contain;
   background:#000;
+}
+
+#playBtn{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  padding:15px 25px;
+  font-size:20px;
+  background:red;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  z-index:30;
 }
 
 #infoBox{
@@ -32,12 +43,7 @@ html, body {
   background:rgba(0,0,0,0.6);
   padding:10px;
   border-radius:8px;
-  z-index:10;
 }
-
-#now{ color:red; }
-#next{ color:#00ffe5; }
-#after{ color:yellow; }
 
 #loader{
   position:fixed;
@@ -54,14 +60,15 @@ html, body {
 }
 
 @keyframes spin{
-  0%{transform:rotate(0deg);}
   100%{transform:rotate(360deg);}
 }
 </style>
 </head>
 <body>
 
-<video id="player" autoplay muted playsinline></video>
+<video id="player" playsinline></video>
+
+<button id="playBtn">▶ Play</button>
 
 <div id="infoBox">
   <div id="now"></div>
@@ -76,34 +83,82 @@ html, body {
 const videos=[
   {
     name:"Rakkhosh Trailer",
-    src:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm",
+    src:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH.webm",
     duration:130
   },
   {
     name:"Tere Mast Mast Do Nain",
-    src:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4",
+    src:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain.mp4",
     duration:240
-  },
-  {
-    name:"Bonolota Express Trailer",
-    src:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4",
-    duration:90
-  },
-  {
-    name:"Kotha Koiyo Na",
-    src:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na%20_%20Coke%20Studio%20Bangla%20_%20Season%202%20_%20Shiblu%20Mredha%20X%20Aleya%20Begum%20X%20Emon%20Chowdhury.mp4",
-    duration:347
-  },
-  {
-    name:"Bhober Deshe Thako Konna",
-    src:"https://ia600406.us.archive.org/27/items/animes-roy-bhaber-deshe-thako-konna-bari-siddiqui-animes-roy/Animes%20Roy%20-%20%E0%A6%AD%E0%A6%BE%E0%A6%AC%E0%A7%87%E0%A6%B0%20%E0%A6%A6%E0%A7%87%E0%A6%B6%E0%A7%87%20%E0%A6%A5%E0%A6%BE%E0%A6%95%E0%A7%8B%20%E0%A6%95%E0%A6%A8%E0%A7%8D%E0%A6%AF%E0%A6%BE.webm",
-    duration:295
   }
 ];
 
 const player=document.getElementById("player");
 const loader=document.getElementById("loader");
+const btn=document.getElementById("playBtn");
 
+let hls;
+let total=videos.reduce((a,b)=>a+b.duration,0);
+
+function playVideo(url){
+
+  loader.style.display="block";
+
+  if(hls){ hls.destroy(); }
+
+  if(url.includes(".m3u8")){
+    if(Hls.isSupported()){
+      hls=new Hls();
+      hls.loadSource(url);
+      hls.attachMedia(player);
+      hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+        loader.style.display="none";
+        player.play();
+      });
+    }else{
+      player.src=url;
+    }
+  }else{
+    player.src=url;
+    player.onloadeddata=()=>{
+      loader.style.display="none";
+      player.play();
+    }
+  }
+}
+
+function start(){
+
+  let now=Math.floor(Date.now()/1000);
+  let pos=now % total;
+
+  let i=0;
+  while(pos>=videos[i].duration){
+    pos-=videos[i].duration;
+    i++;
+  }
+
+  let next=(i+1)%videos.length;
+  let after=(i+2)%videos.length;
+
+  document.getElementById("now").innerText="Now: "+videos[i].name;
+  document.getElementById("next").innerText="Next: "+videos[next].name;
+  document.getElementById("after").innerText="After: "+videos[after].name;
+
+  playVideo(videos[i].src);
+
+}
+
+btn.onclick=function(){
+  btn.style.display="none";
+  start();
+  setInterval(start,30000);
+}
+
+</script>
+
+</body>
+</html>
 let hls;
 let total=videos.reduce((a,b)=>a+b.duration,0);
 
