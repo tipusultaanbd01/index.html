@@ -97,6 +97,7 @@ function startChannel(){
   let nextIndex = (currentIndex+1)%videos.length;
   let afterIndex = (currentIndex+2)%videos.length;
 
+  // overlay সবসময় দৃশ্যমান
   document.getElementById("now").innerText = "Now Playing: "+videos[currentIndex].name;
   document.getElementById("next").innerText = "Next: "+videos[nextIndex].name;
   document.getElementById("after").innerText = "After: "+videos[afterIndex].name;
@@ -104,6 +105,26 @@ function startChannel(){
   if(player.src !== videos[currentIndex].src){
     loader.style.display = "block";
     player.src = videos[currentIndex].src;
+  }
+
+  player.onloadedmetadata = function(){
+    player.currentTime = offset;
+    loader.style.display = "none";
+    player.play().catch(()=>{}); // auto-play restriction handled
+  }
+}
+
+// শুরুতে এবং প্রতি 30 সেকেন্ডে সিঙ্ক
+startChannel();
+setInterval(startChannel,30000);
+
+// ভিডিও শেষ হলে স্বয়ংক্রিয়ভাবে
+player.onended = function(){
+  startChannel();
+}
+</script>
+</body>
+</html>    player.src = videos[currentIndex].src;
   }
 
   player.onloadedmetadata = function(){
