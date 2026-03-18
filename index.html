@@ -2,25 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TV App Pro AC24</title>
-
-<!-- Video.js CSS -->
-<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet"/>
+<title>TV App AC24 Custom Timeline</title>
 
 <style>
-body { margin:0; background:#000; overflow:hidden; }
+body { margin:0; background:#000; overflow:hidden; font-family:sans-serif; }
 
-/* Video Player */
-#player { width:100%; height:100vh; }
+/* Video */
+#player { width:100%; height:100vh; background:#000; }
 
-/* Overlay Logo */
+/* Logo */
 #logo {
   position:absolute;
   top:10px;
   left:15px;
   font-size:22px;
   font-weight:bold;
-  color:red;  /* 🔴 Red */
+  color:red;
   z-index:50;
 }
 
@@ -49,7 +46,7 @@ body { margin:0; background:#000; overflow:hidden; }
 .active { background:#222; }
 .hidden { transform:translateY(100%); }
 
-/* Channel Name Popup */
+/* Channel Name */
 #channelName {
   position:absolute;
   bottom:50%;
@@ -62,20 +59,68 @@ body { margin:0; background:#000; overflow:hidden; }
   opacity:0;
 }
 .show { opacity:1; transition:0.3s; }
+
+/* Custom Controls Overlay */
+#controls {
+  position:absolute;
+  bottom:60px;
+  left:20px;
+  width:calc(100% - 40px);
+  height:30px;
+  background:rgba(0,0,0,0.5);
+  border-radius:5px;
+  display:flex;
+  align-items:center;
+  padding:0 10px;
+  z-index:50;
+}
+#progress {
+  flex:1;
+  height:6px;
+  background:#444;
+  margin:0 10px;
+  border-radius:3px;
+  cursor:pointer;
+  position:relative;
+}
+#progress-filled {
+  width:0%;
+  height:100%;
+  background:#f00;
+  border-radius:3px;
+}
+#time {
+  color:#fff;
+  font-size:14px;
+}
+button {
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+}
 </style>
 </head>
+
 <body>
 
 <div id="logo">Hit's SultaN</div>
 <div id="clock"></div>
 
-<video id="player" class="video-js vjs-default-skin vjs-big-play-centered" controls playsinline></video>
+<video id="player" playsinline webkit-playsinline></video>
 
 <div id="channelName"></div>
 <div id="playlist"></div>
 
-<!-- Video.js JS -->
-<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<!-- Custom Controls -->
+<div id="controls">
+  <button id="playPause">▶️</button>
+  <div id="progress"><div id="progress-filled"></div></div>
+  <div id="time">0:00 / 0:00</div>
+  <button id="fullscreen">⛶</button>
+</div>
+
 <script>
 const channels = [
 { name:"RAKKHOSH Trailer", url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm" },
@@ -85,34 +130,31 @@ const channels = [
 { name:"Woh 7 Din", url:"https://dn710200.ca.archive.org/0/items/woh-7-din-1983-1-cd-xvi-d-dvdrip.by-kunal/Woh_7_Din_1983__1CD_XViD_DVDRip.by-Kunal.mp4" }
 ];
 
-const player = videojs('player', {
-  fluid:true,
-  controlBar: {
-    children: [
-      'playToggle','progressControl','currentTimeDisplay','timeDivider','durationDisplay','volumePanel','fullscreenToggle'
-    ]
-  }
-});
-
+const video = document.getElementById('player');
 const playlist = document.getElementById('playlist');
 const nameBox = document.getElementById('channelName');
+const progressFilled = document.getElementById('progress-filled');
+const timeDisplay = document.getElementById('time');
+const playPauseBtn = document.getElementById('playPause');
+const fullscreenBtn = document.getElementById('fullscreen');
+
 let index=0;
 let hideTimer;
 
 // Build playlist
 channels.forEach((c,i)=>{
   const div=document.createElement('div');
-  div.className="item";
+  div.className='item';
   div.innerText=c.name;
   div.onclick=()=>play(i);
   playlist.appendChild(div);
 });
 
-// Play video
+// Play function
 function play(i){
   index=i;
-  player.src({ src: channels[i].url, type: channels[i].url.includes(".m3u8") ? "application/x-mpegURL":"video/mp4" });
-  player.play();
+  video.src=channels[i].url;
+  video.play();
   highlight();
   showName(channels[i].name);
   showPlaylist();
@@ -127,18 +169,18 @@ function highlight(){
 // Show channel name popup
 function showName(name){
   nameBox.innerText=name;
-  nameBox.classList.add("show");
-  setTimeout(()=>nameBox.classList.remove("show"),3000);
+  nameBox.classList.add('show');
+  setTimeout(()=>nameBox.classList.remove('show'),3000);
 }
 
-// Auto next video
-player.on('ended',()=>{ index=(index+1)%channels.length; play(index); });
+// Auto next
+video.addEventListener('ended',()=>{ index=(index+1)%channels.length; play(index); });
 
-// Playlist auto-hide
+// Playlist hide
 function showPlaylist(){
-  playlist.classList.remove("hidden");
+  playlist.classList.remove('hidden');
   clearTimeout(hideTimer);
-  hideTimer=setTimeout(()=>playlist.classList.add("hidden"),180000);
+  hideTimer=setTimeout(()=>playlist.classList.add('hidden'),180000);
 }
 document.addEventListener('click',()=>showPlaylist());
 
@@ -147,13 +189,41 @@ function updateClock(){
   const now=new Date();
   let h=now.getHours();
   let m=now.getMinutes();
-  const ampm=h>=12?"PM":"AM";
+  const ampm=h>=12?'PM':'AM';
   h=h%12||12;
-  if(m<10)m="0"+m;
-  document.getElementById("clock").innerText=h+":"+m+" "+ampm;
+  if(m<10)m='0'+m;
+  document.getElementById('clock').innerText=h+':'+m+' '+ampm;
 }
 setInterval(updateClock,1000);
 updateClock();
+
+// Play/pause button
+playPauseBtn.addEventListener('click',()=>{
+  if(video.paused){ video.play(); playPauseBtn.innerText='⏸'; }
+  else{ video.pause(); playPauseBtn.innerText='▶️'; }
+});
+
+// Fullscreen button
+fullscreenBtn.addEventListener('click',()=>{ 
+  if(document.fullscreenElement){ document.exitFullscreen(); } 
+  else{ video.requestFullscreen(); } 
+});
+
+// Update custom progress bar
+video.addEventListener('timeupdate',()=>{
+  const percent=(video.currentTime/video.duration)*100||0;
+  progressFilled.style.width=percent+'%';
+  const formatTime=(t)=>{ const m=Math.floor(t/60); const s=Math.floor(t%60); return m+':'+(s<10?'0'+s:s); };
+  timeDisplay.innerText=formatTime(video.currentTime)+' / '+formatTime(video.duration);
+});
+
+// Seek on click
+document.getElementById('progress').addEventListener('click',e=>{
+  const rect=e.target.getBoundingClientRect();
+  const x=e.clientX-rect.left;
+  const percent=x/rect.width;
+  video.currentTime = percent*video.duration;
+});
 
 // Start first video
 play(0);
