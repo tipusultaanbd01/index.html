@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TV App</title>
+<title>TV App Pro</title>
+
+<!-- Video.js CSS -->
+<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet"/>
 
 <style>
 body {
@@ -11,35 +14,34 @@ body {
   overflow:hidden;
 }
 
-/* video */
+/* Video Player Fullscreen */
 #player {
   width:100%;
   height:100vh;
-  background:#000;
 }
 
-/* logo */
+/* Overlay Logo */
 #logo {
   position:absolute;
   top:10px;
   left:15px;
   font-size:20px;
   font-weight:bold;
-  color:red;
-  z-index:10;
+  color:red;  /* 🔴 Red logo */
+  z-index:50;
 }
 
-/* clock */
+/* Clock Overlay */
 #clock {
   position:absolute;
   top:10px;
   right:15px;
   font-size:18px;
   color:#fff;
-  z-index:10;
+  z-index:50;
 }
 
-/* playlist */
+/* Playlist */
 #playlist {
   position:absolute;
   bottom:0;
@@ -48,18 +50,20 @@ body {
   overflow:auto;
   background:rgba(0,0,0,0.9);
   transition:0.4s;
+  z-index:40;
 }
 
 .item {
   padding:12px;
   border-bottom:1px solid #333;
   color:#fff;
+  cursor:pointer;
 }
 
 .active {background:#222;}
 .hidden {transform:translateY(100%);}
 
-/* name */
+/* Channel Name Popup */
 #channelName {
   position:absolute;
   bottom:50%;
@@ -68,6 +72,7 @@ body {
   padding:10px;
   border-radius:5px;
   color:#fff;
+  z-index:50;
   opacity:0;
 }
 .show {opacity:1; transition:0.3s;}
@@ -79,31 +84,109 @@ body {
 <div id="logo">Hit's SultaN</div>
 <div id="clock"></div>
 
-<video id="player" controls playsinline webkit-playsinline></video>
+<video id="player" class="video-js vjs-default-skin vjs-big-play-centered" controls playsinline></video>
 
 <div id="channelName"></div>
 <div id="playlist"></div>
 
+<!-- Video.js JS -->
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@5.15.0/dist/videojs-contrib-hls.min.js"></script>
+
 <script>
 const channels = [
-{
-name:"RAKKHOSH Trailer",
-url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm"
-},
-{
-name:"Tere Mast Mast Do Nain",
-url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4"
-},
-{
-name:"Kotha Koiyo Na",
-url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na%20_%20Coke%20Studio%20Bangla%20_%20Season%202%20_%20Shiblu%20Mredha%20X%20Aleya%20Begum%20X%20Emon%20Chowdhury.mp4"
-},
-{
-name:"Bonolota Express",
-url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4"
-},
-{
-name:"Woh 7 Din",
+{ name:"RAKKHOSH Trailer", url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm" },
+{ name:"Tere Mast Mast Do Nain", url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4" },
+{ name:"Kotha Koiyo Na", url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na%20_%20Coke%20Studio%20Bangla%20_%20Season%202%20_%20Shiblu%20Mredha%20X%20Aleya%20Begum%20X%20Emon%20Chowdhury.mp4" },
+{ name:"Bonolota Express", url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4" },
+{ name:"Woh 7 Din", url:"https://dn710200.ca.archive.org/0/items/woh-7-din-1983-1-cd-xvi-d-dvdrip.by-kunal/Woh_7_Din_1983__1CD_XViD_DVDRip.by-Kunal.mp4" }
+];
+
+const player = videojs('player', {
+  fluid:true,
+  controlBar: {
+    children: [
+      'playToggle',
+      'progressControl',
+      'currentTimeDisplay',
+      'timeDivider',
+      'durationDisplay',
+      'volumePanel',
+      'fullscreenToggle'
+    ]
+  }
+});
+
+const playlist = document.getElementById('playlist');
+const nameBox = document.getElementById('channelName');
+let index = 0;
+let hideTimer;
+
+// Build playlist
+channels.forEach((c,i)=>{
+  const div = document.createElement('div');
+  div.className="item";
+  div.innerText = c.name;
+  div.onclick = ()=>play(i);
+  playlist.appendChild(div);
+});
+
+// Play function
+function play(i){
+  index=i;
+  player.src({ src: channels[i].url, type: channels[i].url.includes(".m3u8") ? "application/x-mpegURL" : "video/mp4" });
+  player.play();
+  highlight();
+  showName(channels[i].name);
+  showPlaylist();
+}
+
+// Highlight active
+function highlight(){
+  document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
+  playlist.children[index].classList.add('active');
+}
+
+// Show channel name popup
+function showName(name){
+  nameBox.innerText = name;
+  nameBox.classList.add("show");
+  setTimeout(()=>nameBox.classList.remove("show"),3000);
+}
+
+// Auto next video
+player.on('ended', ()=>{
+  index = (index+1) % channels.length;
+  play(index);
+});
+
+// Playlist show/hide
+function showPlaylist(){
+  playlist.classList.remove("hidden");
+  clearTimeout(hideTimer);
+  hideTimer=setTimeout(()=>playlist.classList.add("hidden"),180000);
+}
+document.addEventListener('click',()=>showPlaylist());
+
+// Clock with AM/PM
+function updateClock(){
+  const now = new Date();
+  let h = now.getHours();
+  let m = now.getMinutes();
+  const ampm = h>=12 ? "PM":"AM";
+  h = h%12 || 12;
+  if(m<10)m="0"+m;
+  document.getElementById("clock").innerText = h+":"+m+" "+ampm;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// Start first video
+play(0);
+</script>
+
+</body>
+</html>name:"Woh 7 Din",
 url:"https://dn710200.ca.archive.org/0/items/woh-7-din-1983-1-cd-xvi-d-dvdrip.by-kunal/Woh_7_Din_1983__1CD_XViD_DVDRip.by-Kunal.mp4"
 }
 ];
