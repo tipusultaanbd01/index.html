@@ -16,7 +16,6 @@ body {
   flex-direction:column;
 }
 
-/* Video Top Fixed */
 #video-container {
   height:60vh;
   position:relative;
@@ -27,7 +26,6 @@ body {
   height:100%;
 }
 
-/* Overlay */
 .overlay {
   position:absolute;
   z-index:9999;
@@ -55,7 +53,6 @@ body {
   border-radius:5px;
 }
 
-/* Timeline */
 #timeline-container {
   position:absolute;
   bottom:50px;
@@ -70,12 +67,10 @@ body {
   background:red;
 }
 
-/* Playlist FIX */
 #playlist-container {
   flex:1;
   overflow-y:auto;
   background:#000;
-  display:block;
 }
 
 .item {
@@ -110,11 +105,11 @@ const channels = [
 
 const player = videojs('player',{controls:true});
 
-// Overlay inject
+// 🔥 LOGO CHANGE HERE
 const logo=document.createElement('div');
 logo.id="logo";
 logo.className="overlay";
-logo.innerText="Hit's SultaN";
+logo.innerText="SultaN Hit's";
 
 const clock=document.createElement('div');
 clock.id="clock";
@@ -131,6 +126,76 @@ timelineBox.appendChild(timeline);
 player.ready(()=>{
   player.el().appendChild(logo);
   player.el().appendChild(clock);
+  player.el().appendChild(timelineBox);
+});
+
+// Playlist
+const playlist=document.getElementById('playlist');
+let index=0;
+
+channels.forEach((c,i)=>{
+  const div=document.createElement('div');
+  div.className='item';
+  div.innerText=`${i+1}. ${c.name}`;
+  div.onclick=()=>play(i);
+  playlist.appendChild(div);
+});
+
+function highlight(){
+  document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
+  playlist.children[index].classList.add('active');
+}
+
+function play(i){
+  index=i;
+  player.src({src:channels[i].url});
+  player.play();
+  highlight();
+}
+
+player.on('ended',()=>{
+  index=(index+1)%channels.length;
+  play(index);
+});
+
+// Clock
+function updateClock(){
+  const d=new Date();
+  let h=d.getHours();
+  let m=d.getMinutes();
+  const ap=h>=12?'PM':'AM';
+  h=h%12||12;
+  if(m<10)m='0'+m;
+  clock.innerText=h+':'+m+' '+ap;
+}
+setInterval(updateClock,1000);
+
+// Timeline
+player.on('timeupdate',()=>{
+  if(player.duration()){
+    timeline.style.width=(player.currentTime()/player.duration()*100)+'%';
+  }
+});
+
+// Double tap
+let lastTap=0;
+player.el().addEventListener('touchend',e=>{
+  const t=new Date().getTime();
+  const diff=t-lastTap;
+  const x=e.changedTouches[0].clientX;
+
+  if(diff<300){
+    if(x<window.innerWidth/2) player.currentTime(player.currentTime()-5);
+    else player.currentTime(player.currentTime()+5);
+  }
+  lastTap=t;
+});
+
+play(0);
+</script>
+
+</body>
+</html>  player.el().appendChild(clock);
   player.el().appendChild(timelineBox);
 });
 
