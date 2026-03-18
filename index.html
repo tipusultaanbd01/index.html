@@ -129,6 +129,80 @@ function showName(name){
 // Auto next
 player.on('ended',()=>{ index=(index+1)%channels.length; play(index); });
 
+// Playlist hide after 2 seconds
+function showPlaylist(){
+  playlist.classList.remove('hidden');
+  clearTimeout(hideTimer);
+  hideTimer=setTimeout(()=>playlist.classList.add('hidden'),2000);
+}
+
+// Tap to show playlist if not fullscreen
+document.body.addEventListener('click', ()=>{
+  if(!document.fullscreenElement){
+    playlist.classList.remove('hidden');
+    clearTimeout(hideTimer);
+    hideTimer=setTimeout(()=>playlist.classList.add('hidden'),2000);
+  }
+});
+
+// Clock AM/PM
+function updateClock(){
+  const now=new Date();
+  let h=now.getHours();
+  let m=now.getMinutes();
+  const ampm=h>=12?'PM':'AM';
+  h=h%12||12;
+  if(m<10)m='0'+m;
+  document.getElementById('clock').innerText=h+':'+m+' '+ampm;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// Start first video
+play(0);
+
+// Double-tap seek 10 sec
+let lastTap = 0;
+document.getElementById('player').addEventListener('touchend', function(e){
+  const currentTime = new Date().getTime();
+  const tapLength = currentTime - lastTap;
+  const x = e.changedTouches[0].clientX;
+  const w = window.innerWidth;
+  if(tapLength < 300){ // double-tap detected
+    if(x < w/2) player.currentTime(player.currentTime()-10);
+    else player.currentTime(player.currentTime()+10);
+  }
+  lastTap = currentTime;
+});
+</script>
+
+</body>
+</html>// Play function
+function play(i){
+  index=i;
+  player.src({ src: channels[i].url, type: channels[i].url.includes(".m3u8") ? "application/x-mpegURL":"video/mp4" });
+  player.play();
+  highlight();
+  showName(channels[i].name);
+  showPlaylist();
+}
+
+// Highlight active
+function highlight(){
+  document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
+  playlist.children[index].classList.add('active');
+}
+
+// Show channel name
+function showName(name){
+  nameBox.innerText=name;
+  nameBox.classList.add('show');
+  setTimeout(()=>nameBox.classList.remove('show'),3000);
+}
+
+// Auto next
+player.on('ended',()=>{ index=(index+1)%channels.length; play(index); });
+
 // Playlist hide
 function showPlaylist(){
   playlist.classList.remove('hidden');
