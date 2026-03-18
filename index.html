@@ -23,6 +23,7 @@ body {margin:0;background:#000;overflow:hidden;}
   padding:12px;
   border-bottom:1px solid #333;
   color:#fff;
+  cursor:pointer;
 }
 
 .active {background:#222;}
@@ -83,7 +84,7 @@ const nameBox = document.getElementById('channelName');
 let index = 0;
 let hideTimer;
 
-// playlist বানানো
+// playlist তৈরি
 channels.forEach((c,i)=>{
 let div = document.createElement('div');
 div.className="item";
@@ -104,6 +105,53 @@ type: channels[i].url.includes(".m3u8") ? "application/x-mpegURL":"video/mp4"
 });
 
 player.play();
+
+showName(channels[i].name);
+highlight();
+showPlaylist();
+}
+
+// highlight
+function highlight(){
+document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
+playlist.children[index].classList.add('active');
+}
+
+// name popup
+function showName(name){
+nameBox.innerText=name;
+nameBox.classList.add("show");
+setTimeout(()=>nameBox.classList.remove("show"),3000);
+}
+
+// auto next
+player.on('ended',()=>{
+index=(index+1)%channels.length;
+play(index);
+});
+
+// ❌ swipe remove (no channel change)
+
+// playlist show/hide
+function showPlaylist(){
+playlist.classList.remove("hidden");
+clearTimeout(hideTimer);
+hideTimer=setTimeout(()=>{
+playlist.classList.add("hidden");
+},180000);
+}
+
+// touch করলে playlist show
+document.addEventListener('click',()=>{
+showPlaylist();
+});
+
+// start
+play(0);
+</script>
+
+</body>
+</html>player.play();
 
 showName(channels[i].name);
 highlight();
