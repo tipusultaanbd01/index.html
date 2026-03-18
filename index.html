@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TV App AC24 Custom Timeline</title>
-
+<title>TV App AC24 PiP</title>
 <style>
 body { margin:0; background:#000; overflow:hidden; font-family:sans-serif; }
 
@@ -60,10 +59,10 @@ body { margin:0; background:#000; overflow:hidden; font-family:sans-serif; }
 }
 .show { opacity:1; transition:0.3s; }
 
-/* Custom Controls Overlay */
+/* Controls above playlist */
 #controls {
   position:absolute;
-  bottom:60px;
+  bottom:42%;
   left:20px;
   width:calc(100% - 40px);
   height:30px;
@@ -74,36 +73,153 @@ body { margin:0; background:#000; overflow:hidden; font-family:sans-serif; }
   padding:0 10px;
   z-index:50;
 }
-#progress {
-  flex:1;
-  height:6px;
-  background:#444;
-  margin:0 10px;
-  border-radius:3px;
-  cursor:pointer;
-  position:relative;
-}
-#progress-filled {
-  width:0%;
-  height:100%;
-  background:#f00;
-  border-radius:3px;
-}
-#time {
-  color:#fff;
-  font-size:14px;
-}
-button {
-  background:none;
-  border:none;
-  color:#fff;
-  font-size:16px;
-  cursor:pointer;
-}
+#progress { flex:1; height:6px; background:#444; margin:0 10px; border-radius:3px; cursor:pointer; position:relative; }
+#progress-filled { width:0%; height:100%; background:#f00; border-radius:3px; }
+#time { color:#fff; font-size:14px; }
+button { background:none; border:none; color:#fff; font-size:16px; cursor:pointer; }
 </style>
 </head>
-
 <body>
+
+<div id="logo">Hit's SultaN</div>
+<div id="clock"></div>
+
+<video id="player" playsinline webkit-playsinline></video>
+
+<div id="channelName"></div>
+<div id="playlist"></div>
+
+<!-- Controls -->
+<div id="controls">
+  <button id="playPause">▶️</button>
+  <div id="progress"><div id="progress-filled"></div></div>
+  <div id="time">0:00 / 0:00</div>
+  <button id="fullscreen">⛶</button>
+  <button id="pip">🖼️</button>
+</div>
+
+<script>
+const channels = [
+{ name:"RAKKHOSH Trailer", url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm" },
+{ name:"Tere Mast Mast Do Nain", url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4" },
+{ name:"Kotha Koiyo Na", url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na%20_%20Coke%20Studio%20Bangla%20_%20Season%202%20_%20Shiblu%20Mredha%20X%20Aleya%20Begum%20X%20Emon%20Chowdhury.mp4" },
+{ name:"Bonolota Express", url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4" },
+{ name:"Woh 7 Din", url:"https://dn710200.ca.archive.org/0/items/woh-7-din-1983-1-cd-xvi-d-dvdrip.by-kunal/Woh_7_Din_1983__1CD_XViD_DVDRip.by-Kunal.mp4" }
+];
+
+const video = document.getElementById('player');
+const playlist = document.getElementById('playlist');
+const nameBox = document.getElementById('channelName');
+const progressFilled = document.getElementById('progress-filled');
+const timeDisplay = document.getElementById('time');
+const playPauseBtn = document.getElementById('playPause');
+const fullscreenBtn = document.getElementById('fullscreen');
+const pipBtn = document.getElementById('pip');
+
+let index=0;
+let hideTimer;
+
+// Build playlist
+channels.forEach((c,i)=>{
+  const div=document.createElement('div');
+  div.className='item';
+  div.innerText=c.name;
+  div.onclick=()=>play(i);
+  playlist.appendChild(div);
+});
+
+// Play video
+function play(i){
+  index=i;
+  video.src=channels[i].url;
+  video.play();
+  highlight();
+  showName(channels[i].name);
+  showPlaylist();
+}
+
+// Highlight active
+function highlight(){
+  document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
+  playlist.children[index].classList.add('active');
+}
+
+// Show channel name popup
+function showName(name){
+  nameBox.innerText=name;
+  nameBox.classList.add('show');
+  setTimeout(()=>nameBox.classList.remove('show'),3000);
+}
+
+// Auto next
+video.addEventListener('ended',()=>{ index=(index+1)%channels.length; play(index); });
+
+// Playlist hide
+function showPlaylist(){
+  playlist.classList.remove('hidden');
+  clearTimeout(hideTimer);
+  hideTimer=setTimeout(()=>playlist.classList.add('hidden'),180000);
+}
+document.addEventListener('click',()=>showPlaylist());
+
+// Clock AM/PM
+function updateClock(){
+  const now=new Date();
+  let h=now.getHours();
+  let m=now.getMinutes();
+  const ampm=h>=12?'PM':'AM';
+  h=h%12||12;
+  if(m<10)m='0'+m;
+  document.getElementById('clock').innerText=h+':'+m+' '+ampm;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// Play/pause button
+playPauseBtn.addEventListener('click',()=>{
+  if(video.paused){ video.play(); playPauseBtn.innerText='⏸'; }
+  else{ video.pause(); playPauseBtn.innerText='▶️'; }
+});
+
+// Fullscreen button
+fullscreenBtn.addEventListener('click',()=>{ 
+  if(document.fullscreenElement){ document.exitFullscreen(); } 
+  else{ video.requestFullscreen(); } 
+});
+
+// PiP button
+pipBtn.addEventListener('click', async ()=>{
+  try{
+    if(video !== document.pictureInPictureElement){
+      await video.requestPictureInPicture();
+    } else{
+      await document.exitPictureInPicture();
+    }
+  }catch(e){ console.log(e); }
+});
+
+// Update custom progress bar
+video.addEventListener('timeupdate',()=>{
+  const percent=(video.currentTime/video.duration)*100||0;
+  progressFilled.style.width=percent+'%';
+  const formatTime=(t)=>{ const m=Math.floor(t/60); const s=Math.floor(t%60); return m+':'+(s<10?'0'+s:s); };
+  timeDisplay.innerText=formatTime(video.currentTime)+' / '+formatTime(video.duration);
+});
+
+// Seek on click
+document.getElementById('progress').addEventListener('click',e=>{
+  const rect=e.target.getBoundingClientRect();
+  const x=e.clientX-rect.left;
+  const percent=x/rect.width;
+  video.currentTime = percent*video.duration;
+});
+
+// Start first video
+play(0);
+</script>
+
+</body>
+</html><body>
 
 <div id="logo">Hit's SultaN</div>
 <div id="clock"></div>
