@@ -8,61 +8,56 @@
 <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet"/>
 
 <style>
-body { margin:0; background:#000; font-family:sans-serif; overflow:hidden; }
+body { margin:0; background:#000; font-family:sans-serif; overflow:hidden; display:flex; flex-direction:column; height:100vh; }
 
 #player-container {
-  position:fixed;  /* fixed ensures always visible */
-  top:0;
-  left:0;
+  flex: 0 0 60%; /* ভিডিও উপরে 60% স্ক্রিন */
   width:100%;
-  height:100vh;
-  z-index:1;
+  position:relative;
 }
 
 #player { width:100%; height:100%; }
 
 #logo {
-  position:fixed;
+  position:absolute;
   top:10px;
   left:15px;
   font-size:22px;
   color:red;
   font-weight:bold;
-  z-index:10000;
+  z-index:1000;
 }
 
 #clock {
-  position:fixed;
+  position:absolute;
   top:10px;
   right:15px;
   font-size:18px;
   color:#fff;
-  z-index:10000;
+  z-index:1000;
 }
 
-#playlist {
-  position:fixed;
-  bottom:0;
+#playlist-container {
+  flex: 1 1 auto;
   width:100%;
   max-height:40%;
   overflow:auto;
   background:rgba(0,0,0,0.9);
-  transition:0.4s;
-  z-index:9000;
+  z-index:900;
 }
+
 .item { padding:12px; border-bottom:1px solid #333; color:#fff; cursor:pointer; }
 .active { background:#222; }
-.hidden { transform:translateY(100%); }
 
 #channelName {
-  position:fixed;
+  position:absolute;
   bottom:50%;
   left:20px;
   background:rgba(0,0,0,0.6);
   padding:10px;
   border-radius:5px;
   color:#fff;
-  z-index:10000;
+  z-index:1000;
   opacity:0;
 }
 .show { opacity:1; transition:0.3s; }
@@ -72,12 +67,14 @@ body { margin:0; background:#000; font-family:sans-serif; overflow:hidden; }
 
 <div id="player-container">
   <video id="player" class="video-js vjs-big-play-centered" controls preload="auto" playsinline webkit-playsinline></video>
+  <div id="logo">Hit's SultaN</div>
+  <div id="clock"></div>
+  <div id="channelName"></div>
 </div>
 
-<div id="logo">Hit's SultaN</div>
-<div id="clock"></div>
-<div id="channelName"></div>
-<div id="playlist"></div>
+<div id="playlist-container">
+  <div id="playlist"></div>
+</div>
 
 <!-- Video.js JS -->
 <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
@@ -96,7 +93,7 @@ const player = videojs('player', { fluid:true, autoplay:false, controls:true, pr
 
 const playlist = document.getElementById('playlist');
 const nameBox = document.getElementById('channelName');
-let index=0, hideTimer;
+let index=0;
 
 // Build playlist
 channels.forEach((c,i)=>{
@@ -114,7 +111,6 @@ function play(i){
   player.play();
   highlight();
   showName(channels[i].name);
-  showPlaylist();
 }
 
 // Highlight active
@@ -130,24 +126,8 @@ function showName(name){
   setTimeout(()=>nameBox.classList.remove('show'),3000);
 }
 
-// Auto next
+// Auto next video
 player.on('ended',()=>{ index=(index+1)%channels.length; play(index); });
-
-// Playlist auto-hide 2 sec
-function showPlaylist(){
-  playlist.classList.remove('hidden');
-  clearTimeout(hideTimer);
-  hideTimer=setTimeout(()=>playlist.classList.add('hidden'),2000);
-}
-
-// Tap anywhere on screen to toggle playlist if not fullscreen
-document.body.addEventListener('click', ()=>{
-  if(!document.fullscreenElement){
-    playlist.classList.remove('hidden');
-    clearTimeout(hideTimer);
-    hideTimer=setTimeout(()=>playlist.classList.add('hidden'),2000);
-  }
-});
 
 // Clock AM/PM
 function updateClock(){
@@ -177,6 +157,13 @@ document.getElementById('player').addEventListener('touchend', function(e){
     else player.currentTime(player.currentTime()+10);
   }
   lastTap = currentTime;
+});
+
+// Tap to toggle playlist visibility (fullscreen না থাকলে)
+document.getElementById('player-container').addEventListener('click', ()=>{
+  if(!document.fullscreenElement){
+    playlist.classList.toggle('hidden');
+  }
 });
 </script>
 
