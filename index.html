@@ -2,47 +2,55 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pro TV Player Fullscreen Overlay</title>
+<title>Pro TV Player Fixed Video</title>
 
 <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet"/>
-
 <style>
-body { margin:0; background:#000; font-family:sans-serif; }
+body { margin:0; background:#000; font-family:sans-serif; overflow:hidden; display:flex; flex-direction:column; height:100vh; }
 
-#playlist-container {
+#video-container {
+  flex: 0 0 60%; /* ভিডিও উপরে 60% */
+  position: relative;
   width:100%;
-  max-height:40%;
-  overflow:auto;
-  background:rgba(0,0,0,0.9);
 }
-.item { padding:12px; border-bottom:1px solid #333; color:#fff; cursor:pointer; }
-.active { background:#222; }
+
+#player { width:100%; height:100%; }
 
 .logo-overlay, .clock-overlay {
   position:absolute;
   z-index:9999;
-  color:#ff0000;
-  font-weight:bold;
-  font-size:20px;
   padding:5px 10px;
-  background:rgba(0,0,0,0.3);
   border-radius:5px;
   pointer-events:none;
 }
 
-.logo-overlay { top:10px; left:10px; }
-.clock-overlay { top:10px; right:10px; color:#fff; }
+.logo-overlay { top:10px; left:10px; color:red; font-weight:bold; font-size:22px; background:rgba(0,0,0,0.3);}
+.clock-overlay { top:10px; right:10px; color:#fff; font-size:18px; background:rgba(0,0,0,0.3);}
+
+#playlist-container {
+  flex: 1 1 auto;
+  overflow-y:auto; /* Scroll শুধুমাত্র playlist */
+  background:rgba(0,0,0,0.9);
+}
+
+.item { padding:12px; border-bottom:1px solid #333; color:#fff; cursor:pointer; }
+.active { background:#222; }
 </style>
 </head>
 <body>
 
-<video id="player" class="video-js vjs-big-play-centered" controls preload="auto" playsinline webkit-playsinline width="100%" height="60vh"></video>
+<div id="video-container">
+  <video id="player" class="video-js vjs-big-play-centered" controls preload="auto" playsinline webkit-playsinline></video>
+  <div class="logo-overlay">Hit's SultaN</div>
+  <div class="clock-overlay"></div>
+</div>
 
 <div id="playlist-container">
   <div id="playlist"></div>
 </div>
 
 <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+
 <script>
 const channels = [
   { name:"RAKKHOSH Trailer", url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm" },
@@ -52,34 +60,10 @@ const channels = [
 
 const player = videojs('player', { fluid:true, autoplay:false, controls:true, preload:'auto' });
 
-// Overlay elements
-const logoOverlay = document.createElement('div');
-logoOverlay.className = 'logo-overlay';
-logoOverlay.innerText = "Hit's SultaN";
-
-const clockOverlay = document.createElement('div');
-clockOverlay.className = 'clock-overlay';
-
-player.el().appendChild(logoOverlay);
-player.el().appendChild(clockOverlay);
-
-// Clock update
-function updateClock(){
-  const now=new Date();
-  let h=now.getHours();
-  let m=now.getMinutes();
-  const ampm=h>=12?'PM':'AM';
-  h=h%12||12;
-  if(m<10)m='0'+m;
-  clockOverlay.innerText = h+":"+m+" "+ampm;
-}
-setInterval(updateClock,1000);
-updateClock();
-
-// Playlist
 const playlist = document.getElementById('playlist');
 let index=0;
 
+// Build playlist
 channels.forEach((c,i)=>{
   const div = document.createElement('div');
   div.className='item';
@@ -105,35 +89,9 @@ player.on('ended',()=>{ index=(index+1)%channels.length; play(index); });
 
 // Start first video
 play(0);
-</script>
-</body>
-</html>
-// Play function
-function play(i){
-  index=i;
-  player.src({ src: channels[i].url, type: channels[i].url.includes(".m3u8") ? "application/x-mpegURL":"video/mp4" });
-  player.play();
-  highlight();
-  showName(channels[i].name);
-}
 
-// Highlight active
-function highlight(){
-  document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
-  playlist.children[index].classList.add('active');
-}
-
-// Show channel name
-function showName(name){
-  nameBox.innerText=name;
-  nameBox.classList.add('show');
-  setTimeout(()=>nameBox.classList.remove('show'),3000);
-}
-
-// Auto next video
-player.on('ended',()=>{ index=(index+1)%channels.length; play(index); });
-
-// Clock AM/PM
+// Clock overlay
+const clockOverlay = document.querySelector('.clock-overlay');
 function updateClock(){
   const now=new Date();
   let h=now.getHours();
@@ -141,34 +99,10 @@ function updateClock(){
   const ampm=h>=12?'PM':'AM';
   h=h%12||12;
   if(m<10)m='0'+m;
-  document.getElementById('clock').innerText=h+':'+m+' '+ampm;
+  clockOverlay.innerText = h+":"+m+" "+ampm;
 }
 setInterval(updateClock,1000);
 updateClock();
-
-// Start first video
-play(0);
-
-// Double-tap seek 10 sec
-let lastTap = 0;
-document.getElementById('player').addEventListener('touchend', function(e){
-  const currentTime = new Date().getTime();
-  const tapLength = currentTime - lastTap;
-  const x = e.changedTouches[0].clientX;
-  const w = window.innerWidth;
-  if(tapLength < 300){
-    if(x < w/2) player.currentTime(player.currentTime()-10);
-    else player.currentTime(player.currentTime()+10);
-  }
-  lastTap = currentTime;
-});
-
-// Tap player to toggle playlist (fullscreen না থাকলে)
-document.getElementById('player-container').addEventListener('click', ()=>{
-  if(!document.fullscreenElement){
-    playlist.classList.toggle('hidden');
-  }
-});
 </script>
 
 </body>
