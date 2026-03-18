@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <title>TV App</title>
 
-<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet"/>
-
 <style>
 body {
   margin:0;
@@ -13,10 +11,11 @@ body {
   overflow:hidden;
 }
 
-/* player fix */
+/* video */
 #player {
   width:100%;
   height:100vh;
+  background:#000;
 }
 
 /* logo */
@@ -26,8 +25,8 @@ body {
   left:15px;
   font-size:20px;
   font-weight:bold;
-  color:red; /* 🔴 RED */
-  z-index:30;
+  color:red;
+  z-index:10;
 }
 
 /* clock */
@@ -37,7 +36,7 @@ body {
   right:15px;
   font-size:18px;
   color:#fff;
-  z-index:30;
+  z-index:10;
 }
 
 /* playlist */
@@ -49,7 +48,6 @@ body {
   overflow:auto;
   background:rgba(0,0,0,0.9);
   transition:0.4s;
-  z-index:10;
 }
 
 .item {
@@ -61,7 +59,7 @@ body {
 .active {background:#222;}
 .hidden {transform:translateY(100%);}
 
-/* channel name */
+/* name */
 #channelName {
   position:absolute;
   bottom:50%;
@@ -70,7 +68,6 @@ body {
   padding:10px;
   border-radius:5px;
   color:#fff;
-  z-index:20;
   opacity:0;
 }
 .show {opacity:1; transition:0.3s;}
@@ -82,19 +79,10 @@ body {
 <div id="logo">Hit's SultaN</div>
 <div id="clock"></div>
 
-<video 
-  id="player" 
-  class="video-js vjs-default-skin vjs-big-play-centered"
-  controls
-  preload="auto"
-  playsinline
-  webkit-playsinline
-></video>
+<video id="player" controls playsinline webkit-playsinline></video>
 
 <div id="channelName"></div>
 <div id="playlist"></div>
-
-<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
 
 <script>
 const channels = [
@@ -104,6 +92,100 @@ url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-off
 },
 {
 name:"Tere Mast Mast Do Nain",
+url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4"
+},
+{
+name:"Kotha Koiyo Na",
+url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na%20_%20Coke%20Studio%20Bangla%20_%20Season%202%20_%20Shiblu%20Mredha%20X%20Aleya%20Begum%20X%20Emon%20Chowdhury.mp4"
+},
+{
+name:"Bonolota Express",
+url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4"
+},
+{
+name:"Woh 7 Din",
+url:"https://dn710200.ca.archive.org/0/items/woh-7-din-1983-1-cd-xvi-d-dvdrip.by-kunal/Woh_7_Din_1983__1CD_XViD_DVDRip.by-Kunal.mp4"
+}
+];
+
+const video = document.getElementById("player");
+const playlist = document.getElementById("playlist");
+const nameBox = document.getElementById("channelName");
+
+let index = 0;
+let hideTimer;
+
+// playlist
+channels.forEach((c,i)=>{
+let div=document.createElement('div');
+div.className="item";
+div.innerText=c.name;
+div.onclick=()=>play(i);
+playlist.appendChild(div);
+});
+
+// play
+function play(i){
+index=i;
+video.src = channels[i].url;
+video.play();
+
+highlight();
+showName(channels[i].name);
+showPlaylist();
+}
+
+// highlight
+function highlight(){
+document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
+playlist.children[index].classList.add('active');
+}
+
+// name
+function showName(name){
+nameBox.innerText=name;
+nameBox.classList.add("show");
+setTimeout(()=>nameBox.classList.remove("show"),3000);
+}
+
+// auto next
+video.onended = ()=>{
+index=(index+1)%channels.length;
+play(index);
+};
+
+// playlist hide
+function showPlaylist(){
+playlist.classList.remove("hidden");
+clearTimeout(hideTimer);
+hideTimer=setTimeout(()=>{
+playlist.classList.add("hidden");
+},180000);
+}
+
+document.addEventListener('click',()=>showPlaylist());
+
+// clock
+function updateClock(){
+let now=new Date();
+let h=now.getHours();
+let m=now.getMinutes();
+
+let ampm = h>=12 ? "PM":"AM";
+h=h%12||12;
+if(m<10)m="0"+m;
+
+document.getElementById("clock").innerText=h+":"+m+" "+ampm;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// start
+play(0);
+</script>
+
+</body>
+</html>name:"Tere Mast Mast Do Nain",
 url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4"
 },
 {
