@@ -1,109 +1,164 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>TV App Pro</title>
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
 
 <style>
-body{
-  margin:0;
-  background:#000;
-  height:100vh;
-}
-video{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  background:#000;
-}
-#btn{
+body {margin:0;background:#000;color:#fff;font-family:sans-serif;}
+
+#player {width:100%;height:60vh;}
+
+#playlist {
   position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  padding:15px 25px;
-  font-size:20px;
-  background:red;
-  color:white;
-  border:none;
-  border-radius:8px;
+  bottom:0;
+  width:100%;
+  max-height:40%;
+  overflow:auto;
+  background:rgba(0,0,0,0.9);
+  transition:0.3s;
 }
+
+.item {
+  padding:12px;
+  border-bottom:1px solid #333;
+}
+
+.active {background:#222;}
+.hidden {transform:translateY(100%);}
+
+.fav {float:right;color:gold;}
 </style>
 </head>
+
 <body>
 
-<video id="v" controls playsinline></video>
-<button id="btn">▶ Play</button>
+<video id="player" class="video-js vjs-default-skin" controls autoplay></video>
+
+<div id="playlist"></div>
+
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
-
 const videos = [
-"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm",
-
-"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4",
-
-"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express.mp4",
-
-"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na.mp4",
-
-"https://ia600406.us.archive.org/27/items/animes-roy-bhaber-deshe-thako-konna-bari-siddiqui-animes-roy/Animes%20Roy%20-%20Bhober%20Deshe%20Thako%20Konna.webm",
-
-// test m3u8 (live tv example)
-"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+{
+name:"RAKKHOSH Trailer",
+url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm"
+},
+{
+name:"Tere Mast Mast Do Nain",
+url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4"
+},
+{
+name:"Kotha Koiyo Na",
+url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na%20_%20Coke%20Studio%20Bangla%20_%20Season%202%20_%20Shiblu%20Mredha%20X%20Aleya%20Begum%20X%20Emon%20Chowdhury.mp4"
+},
+{
+name:"Bonolota Express",
+url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4"
+},
+{
+name:"Woh 7 Din",
+url:"https://dn710200.ca.archive.org/0/items/woh-7-din-1983-1-cd-xvi-d-dvdrip.by-kunal/Woh_7_Din_1983__1CD_XViD_DVDRip.by-Kunal.mp4"
+}
 ];
 
-let index = 0;
-let hls;
+const player = videojs('player');
+const playlist = document.getElementById('playlist');
 
-const v = document.getElementById("v");
-const btn = document.getElementById("btn");
+let currentIndex = 0;
+let hideTimer;
 
-btn.onclick = function(){
-  btn.style.display="none";
-  playVideo();
+// playlist UI
+videos.forEach((v,i)=>{
+let favs = JSON.parse(localStorage.getItem("fav")||"[]");
+
+let div = document.createElement('div');
+div.className="item";
+div.id="item"+i;
+
+div.innerHTML = v.name + 
+`<span class="fav">${favs.includes(i)?"★":"☆"}</span>`;
+
+div.onclick=()=>playVideo(i);
+
+// fav toggle
+div.querySelector('.fav').onclick=(e)=>{
+e.stopPropagation();
+let favs = JSON.parse(localStorage.getItem("fav")||"[]");
+if(favs.includes(i)){
+favs=favs.filter(x=>x!=i);
+}else{
+favs.push(i);
+}
+localStorage.setItem("fav",JSON.stringify(favs));
+location.reload();
+};
+
+playlist.appendChild(div);
+});
+
+// play function
+function playVideo(i){
+currentIndex=i;
+player.src({
+src:videos[i].url,
+type: videos[i].url.includes(".m3u8") ? "application/x-mpegURL":"video/mp4"
+});
+player.play();
+
+document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
+document.getElementById("item"+i).classList.add('active');
+
+autoHide();
 }
 
-function playVideo(){
+// auto next
+player.on('ended',()=>{
+currentIndex=(currentIndex+1)%videos.length;
+playVideo(currentIndex);
+});
 
-  let url = videos[index];
+// remote control
+document.addEventListener('keydown',(e)=>{
+if(e.key==="ArrowDown"){
+currentIndex=(currentIndex+1)%videos.length;
+playVideo(currentIndex);
+}
+if(e.key==="ArrowUp"){
+currentIndex=(currentIndex-1+videos.length)%videos.length;
+playVideo(currentIndex);
+}
+});
 
-  // destroy old hls
-  if(hls){
-    hls.destroy();
-  }
+// swipe control
+let startY=0;
+document.addEventListener('touchstart',e=>startY=e.touches[0].clientY);
+document.addEventListener('touchend',e=>{
+let endY=e.changedTouches[0].clientY;
 
-  // m3u8
-  if(url.includes(".m3u8")){
-    if(Hls.isSupported()){
-      hls = new Hls();
-      hls.loadSource(url);
-      hls.attachMedia(v);
-      hls.on(Hls.Events.MANIFEST_PARSED, function(){
-        v.play();
-      });
-    } else {
-      v.src = url;
-      v.play();
-    }
-  }
+if(startY-endY>50){ playlist.classList.remove("hidden"); }
+if(endY-startY>50){ playlist.classList.add("hidden"); }
+});
 
-  // normal video
-  else{
-    v.src = url;
-    v.play();
-  }
-
-  v.onended = function(){
-    index++;
-    if(index >= videos.length) index = 0;
-    playVideo();
-  }
+// auto hide
+function autoHide(){
+playlist.classList.remove("hidden");
+clearTimeout(hideTimer);
+hideTimer=setTimeout(()=>{
+playlist.classList.add("hidden");
+},3000);
 }
 
+// first play
+playVideo(0);
 </script>
 
 </body>
+</html></body>
 </html>
   if(hls){ hls.destroy(); }
 
