@@ -19,22 +19,22 @@ body { margin:0; background:#000; font-family:sans-serif; overflow:hidden; displ
 #player { width:100%; height:100%; }
 
 #logo {
-  position:absolute;
+  position:fixed; /* fixed makes it stay on fullscreen */
   top:10px;
   left:15px;
   font-size:22px;
   color:red;
   font-weight:bold;
-  z-index:1000;
+  z-index:10000;
 }
 
 #clock {
-  position:absolute;
+  position:fixed; /* fixed makes it stay on fullscreen */
   top:10px;
   right:15px;
   font-size:18px;
   color:#fff;
-  z-index:1000;
+  z-index:10000;
 }
 
 #playlist-container {
@@ -43,21 +43,21 @@ body { margin:0; background:#000; font-family:sans-serif; overflow:hidden; displ
   max-height:40%;
   overflow:auto;
   background:rgba(0,0,0,0.9);
-  z-index:900;
+  z-index:9000;
 }
 
 .item { padding:12px; border-bottom:1px solid #333; color:#fff; cursor:pointer; }
 .active { background:#222; }
 
 #channelName {
-  position:absolute;
+  position:fixed;
   bottom:50%;
   left:20px;
   background:rgba(0,0,0,0.6);
   padding:10px;
   border-radius:5px;
   color:#fff;
-  z-index:1000;
+  z-index:10000;
   opacity:0;
 }
 .show { opacity:1; transition:0.3s; }
@@ -159,7 +159,7 @@ document.getElementById('player').addEventListener('touchend', function(e){
   lastTap = currentTime;
 });
 
-// Tap to toggle playlist visibility (fullscreen না থাকলে)
+// Tap player to toggle playlist (fullscreen না থাকলে)
 document.getElementById('player-container').addEventListener('click', ()=>{
   if(!document.fullscreenElement){
     playlist.classList.toggle('hidden');
