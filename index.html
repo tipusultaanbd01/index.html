@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Ultimate TV Player</title>
+<title>SultaN Hit's Player</title>
 
 <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet"/>
 
@@ -16,9 +16,11 @@ body {
   flex-direction:column;
 }
 
+/* VIDEO */
 #video-container {
   height:60vh;
   position:relative;
+  background:#000;
 }
 
 #player {
@@ -26,40 +28,41 @@ body {
   height:100%;
 }
 
+/* OVERLAY (FIXED) */
 .overlay {
   position:absolute;
-  z-index:9999;
+  z-index:99999;
   pointer-events:none;
-  font-weight:bold;
 }
 
 #logo {
   top:10px;
   left:10px;
   color:red;
-  font-size:22px;
-  background:rgba(0,0,0,0.4);
+  font-size:20px;
+  background:rgba(0,0,0,0.5);
   padding:5px 10px;
-  border-radius:5px;
+  border-radius:6px;
 }
 
 #clock {
   top:10px;
   right:10px;
   color:#fff;
-  font-size:18px;
-  background:rgba(0,0,0,0.4);
+  font-size:16px;
+  background:rgba(0,0,0,0.5);
   padding:5px 10px;
-  border-radius:5px;
+  border-radius:6px;
 }
 
+/* TIMELINE */
 #timeline-container {
   position:absolute;
-  bottom:50px;
+  bottom:45px;
   left:10px;
   right:10px;
-  height:5px;
-  background:rgba(255,0,0,0.2);
+  height:4px;
+  background:rgba(255,0,0,0.3);
 }
 #timeline {
   height:100%;
@@ -67,6 +70,7 @@ body {
   background:red;
 }
 
+/* PLAYLIST */
 #playlist-container {
   flex:1;
   overflow-y:auto;
@@ -79,10 +83,12 @@ body {
   border-bottom:1px solid #333;
   cursor:pointer;
 }
+.item:hover { background:#111; }
 .active { background:#222; }
-</style>
 
+</style>
 </head>
+
 <body>
 
 <div id="video-container">
@@ -97,46 +103,47 @@ body {
 
 <script>
 const channels = [
-  { name:"RAKKHOSH Trailer", url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm"},
-  { name:"Tere Mast Mast Do Nain", url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4"},
-  { name:"Kotha Koiyo Na", url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na%20_%20Coke%20Studio%20Bangla%20_%20Season%202%20_%20Shiblu%20Mredha%20X%20Aleya%20Begum%20X%20Emon%20Chowdhury.mp4"},
-  { name:"Bonolota Express", url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4"}
+  { name:"RAKKHOSH Trailer", url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH.webm"},
+  { name:"Tere Mast Mast Do Nain", url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-720p.mp4"},
+  { name:"Kotha Koiyo Na", url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na.mp4"},
+  { name:"Bonolota Express", url:"https://ia601400.us.archive.org/16/items/bonolota-express.mp4"}
 ];
 
-const player = videojs('player',{controls:true});
+const player = videojs('player');
 
-// 🔥 LOGO CHANGE HERE
-const logo=document.createElement('div');
-logo.id="logo";
-logo.className="overlay";
-logo.innerText="SultaN Hit's";
+// OVERLAY CREATE
+const logo = document.createElement('div');
+logo.id = "logo";
+logo.className = "overlay";
+logo.innerText = "SultaN Hit's";
 
-const clock=document.createElement('div');
-clock.id="clock";
-clock.className="overlay";
+const clock = document.createElement('div');
+clock.id = "clock";
+clock.className = "overlay";
 
-const timelineBox=document.createElement('div');
-timelineBox.id="timeline-container";
+const timelineBox = document.createElement('div');
+timelineBox.id = "timeline-container";
 
-const timeline=document.createElement('div');
-timeline.id="timeline";
-
+const timeline = document.createElement('div');
+timeline.id = "timeline";
 timelineBox.appendChild(timeline);
 
+// ADD OVERLAY CORRECTLY
 player.ready(()=>{
-  player.el().appendChild(logo);
-  player.el().appendChild(clock);
-  player.el().appendChild(timelineBox);
+  const el = player.el();
+  el.appendChild(logo);
+  el.appendChild(clock);
+  el.appendChild(timelineBox);
 });
 
-// Playlist
-const playlist=document.getElementById('playlist');
-let index=0;
+// PLAYLIST
+const playlist = document.getElementById('playlist');
+let index = 0;
 
 channels.forEach((c,i)=>{
   const div=document.createElement('div');
   div.className='item';
-  div.innerText=`${i+1}. ${c.name}`;
+  div.innerText=(i+1)+". "+c.name;
   div.onclick=()=>play(i);
   playlist.appendChild(div);
 });
@@ -153,12 +160,13 @@ function play(i){
   highlight();
 }
 
+// AUTO NEXT
 player.on('ended',()=>{
   index=(index+1)%channels.length;
   play(index);
 });
 
-// Clock
+// CLOCK FIX
 function updateClock(){
   const d=new Date();
   let h=d.getHours();
@@ -170,101 +178,32 @@ function updateClock(){
 }
 setInterval(updateClock,1000);
 
-// Timeline
+// TIMELINE FIX
 player.on('timeupdate',()=>{
-  if(player.duration()){
-    timeline.style.width=(player.currentTime()/player.duration()*100)+'%';
+  const dur = player.duration();
+  if(dur){
+    timeline.style.width = (player.currentTime()/dur*100)+"%";
   }
 });
 
-// Double tap
-let lastTap=0;
-player.el().addEventListener('touchend',e=>{
-  const t=new Date().getTime();
-  const diff=t-lastTap;
-  const x=e.changedTouches[0].clientX;
-
-  if(diff<300){
-    if(x<window.innerWidth/2) player.currentTime(player.currentTime()-5);
-    else player.currentTime(player.currentTime()+5);
+// DOUBLE TAP FIX (NO BUG)
+let lastTap = 0;
+player.el().addEventListener('touchend', function(e){
+  const now = Date.now();
+  if(now - lastTap < 300){
+    const x = e.changedTouches[0].clientX;
+    if(x < window.innerWidth/2){
+      player.currentTime(player.currentTime() - 5);
+    } else {
+      player.currentTime(player.currentTime() + 5);
+    }
   }
-  lastTap=t;
+  lastTap = now;
 });
 
+// START
 play(0);
+
 </script>
-
-</body>
-</html>  player.el().appendChild(clock);
-  player.el().appendChild(timelineBox);
-});
-
-// Playlist
-const playlist=document.getElementById('playlist');
-let index=0;
-
-channels.forEach((c,i)=>{
-  const div=document.createElement('div');
-  div.className='item';
-  div.innerText=`${i+1}. ${c.name}`;
-  div.onclick=()=>play(i);
-  playlist.appendChild(div);
-});
-
-function highlight(){
-  document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
-  playlist.children[index].classList.add('active');
-}
-
-function play(i){
-  index=i;
-  player.src({src:channels[i].url});
-  player.play();
-  highlight();
-}
-
-// Auto next
-player.on('ended',()=>{
-  index=(index+1)%channels.length;
-  play(index);
-});
-
-// Clock
-function updateClock(){
-  const d=new Date();
-  let h=d.getHours();
-  let m=d.getMinutes();
-  const ap=h>=12?'PM':'AM';
-  h=h%12||12;
-  if(m<10)m='0'+m;
-  clock.innerText=h+':'+m+' '+ap;
-}
-setInterval(updateClock,1000);
-
-// Timeline
-player.on('timeupdate',()=>{
-  if(player.duration()){
-    timeline.style.width=(player.currentTime()/player.duration()*100)+'%';
-  }
-});
-
-// Double tap 5 sec
-let lastTap=0;
-player.el().addEventListener('touchend',e=>{
-  const t=new Date().getTime();
-  const diff=t-lastTap;
-  const x=e.changedTouches[0].clientX;
-
-  if(diff<300){
-    if(x<window.innerWidth/2) player.currentTime(player.currentTime()-5);
-    else player.currentTime(player.currentTime()+5);
-  }
-  lastTap=t;
-});
-
-// Start
-play(0);
-</script>
-
 </body>
 </html>
