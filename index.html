@@ -13,10 +13,31 @@ body {
   overflow:hidden;
 }
 
-/* player */
+/* player fix */
 #player {
   width:100%;
   height:100vh;
+}
+
+/* logo */
+#logo {
+  position:absolute;
+  top:10px;
+  left:15px;
+  font-size:20px;
+  font-weight:bold;
+  color:red; /* 🔴 RED */
+  z-index:30;
+}
+
+/* clock */
+#clock {
+  position:absolute;
+  top:10px;
+  right:15px;
+  font-size:18px;
+  color:#fff;
+  z-index:30;
 }
 
 /* playlist */
@@ -53,27 +74,6 @@ body {
   opacity:0;
 }
 .show {opacity:1; transition:0.3s;}
-
-/* LOGO */
-#logo {
-  position:absolute;
-  top:10px;
-  left:15px;
-  font-size:20px;
-  font-weight:bold;
-  color:#fff;
-  z-index:30;
-}
-
-/* CLOCK */
-#clock {
-  position:absolute;
-  top:10px;
-  right:15px;
-  font-size:18px;
-  color:#fff;
-  z-index:30;
-}
 </style>
 </head>
 
@@ -82,7 +82,14 @@ body {
 <div id="logo">Hit's SultaN</div>
 <div id="clock"></div>
 
-<video id="player" class="video-js vjs-default-skin vjs-big-play-centered" controls playsinline></video>
+<video 
+  id="player" 
+  class="video-js vjs-default-skin vjs-big-play-centered"
+  controls
+  preload="auto"
+  playsinline
+  webkit-playsinline
+></video>
 
 <div id="channelName"></div>
 <div id="playlist"></div>
@@ -106,6 +113,112 @@ url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-s
 {
 name:"Bonolota Express",
 url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4"
+},
+{
+name:"Woh 7 Din",
+url:"https://dn710200.ca.archive.org/0/items/woh-7-din-1983-1-cd-xvi-d-dvdrip.by-kunal/Woh_7_Din_1983__1CD_XViD_DVDRip.by-Kunal.mp4"
+}
+];
+
+const player = videojs('player', {
+  fluid:false,
+  controlBar: {
+    children: [
+      'playToggle',
+      'progressControl',   // ✅ timeline
+      'currentTimeDisplay',
+      'timeDivider',
+      'durationDisplay',   // ✅ duration
+      'volumePanel',
+      'fullscreenToggle'   // ✅ fullscreen
+    ]
+  }
+});
+
+const playlist = document.getElementById('playlist');
+const nameBox = document.getElementById('channelName');
+
+let index = 0;
+let hideTimer;
+
+// playlist
+channels.forEach((c,i)=>{
+let div=document.createElement('div');
+div.className="item";
+div.innerText=c.name;
+div.onclick=()=>play(i);
+playlist.appendChild(div);
+});
+
+// play
+function play(i){
+index=i;
+
+player.src({
+  src: channels[i].url,
+  type: channels[i].url.endsWith(".webm") ? "video/webm" :
+        channels[i].url.includes(".m3u8") ? "application/x-mpegURL" :
+        "video/mp4"
+});
+
+player.play();
+
+highlight();
+showName(channels[i].name);
+showPlaylist();
+}
+
+// highlight
+function highlight(){
+document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
+playlist.children[index].classList.add('active');
+}
+
+// name popup
+function showName(name){
+nameBox.innerText=name;
+nameBox.classList.add("show");
+setTimeout(()=>nameBox.classList.remove("show"),3000);
+}
+
+// auto next
+player.on('ended',()=>{
+index=(index+1)%channels.length;
+play(index);
+});
+
+// playlist hide
+function showPlaylist(){
+playlist.classList.remove("hidden");
+clearTimeout(hideTimer);
+hideTimer=setTimeout(()=>{
+playlist.classList.add("hidden");
+},180000);
+}
+
+document.addEventListener('click',()=>showPlaylist());
+
+// clock
+function updateClock(){
+let now=new Date();
+let h=now.getHours();
+let m=now.getMinutes();
+
+let ampm = h>=12 ? "PM":"AM";
+h=h%12||12;
+if(m<10)m="0"+m;
+
+document.getElementById("clock").innerText=h+":"+m+" "+ampm;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// start
+play(0);
+</script>
+
+</body>
+</html>url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4"
 },
 {
 name:"Woh 7 Din",
