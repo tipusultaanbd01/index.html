@@ -20,8 +20,8 @@ body{margin:0;background:#000;font-family:sans-serif;height:100vh;display:flex;f
 .item:hover{background:#111;}
 .active{background:#222;}
 </style>
-
 </head>
+
 <body>
 
 <div id="video-container">
@@ -35,22 +35,32 @@ body{margin:0;background:#000;font-family:sans-serif;height:100vh;display:flex;f
 <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
 
 <script>
+
+// 🔥 ALL VIDEOS
 const channels = [
 
-  // OLD
-  {name:"RAKKHOSH Trailer",url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20.webm"},
-  {name:"Tere Mast Mast Do Nain",url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20Full%20Song.mp4"},
-  {name:"Kotha Koiyo Na",url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na.mp4"},
-  {name:"Bonolota Express",url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh.mp4"},
+  {name:"RAKKHOSH Trailer",url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm"},
 
-  // NEW
+  {name:"Tere Mast Mast Do Nain",url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4"},
+
+  {name:"Kotha Koiyo Na",url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na%20_%20Coke%20Studio%20Bangla%20_%20Season%202%20_%20Shiblu%20Mredha%20X%20Aleya%20Begum%20X%20Emon%20Chowdhury.mp4"},
+
+  {name:"Bonolota Express",url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4"},
+
   {name:"Mardaani 3 (2026)",url:"http://103.225.94.27/Infobase/hdd-3/hindi/Mardaani%203%20(2026)%201080p%20DVDRip.mp4"},
-  {name:"Border 2 (2026)",url:"http://103.225.94.27/Infobase/hdd-3/hindi/Border%202%20(2026)%20720p%20HDTS.mp4"},
+
+  {name:"Border 2 (2026)",url:"http://103.225.94.27/Infobase/hdd-3/hindi/Border%202%20(2026)%20Hindi%20720p%20HDTS%20x264%20%5bDDN%5d.mp4"},
+
   {name:"Antarjal (2023)",url:"http://103.225.94.27/Infobase/hdd-2/Bangla/Antarjal%20(2023)%201080p%20WEBDL.mp4"}
 
 ];
 
-const player = videojs('player');
+// 🔥 PLAYER FIX
+const player = videojs('player', {
+  controls:true,
+  preload:"auto",
+  fluid:true
+});
 
 // overlays
 const logo=document.createElement('div');
@@ -93,17 +103,70 @@ function highlight(){
   playlist.children[index].classList.add('active');
 }
 
-// 🔥 SMART PLAY FUNCTION (FINAL)
+// 🔥 FINAL PLAY FIX
 function play(i){
   index=i;
 
-  let url = channels[i].url;
+  let url=channels[i].url;
+  let type="video/mp4";
 
-  // proxy for blocked server
-  if(url.includes("103.225.94.27")){
-    url = "https://corsproxy.io/?" + encodeURIComponent(url);
+  if(url.includes(".webm")) type="video/webm";
+  if(url.includes(".m3u8")) type="application/x-mpegURL";
+
+  player.pause();
+  player.src({src:url,type:type});
+  player.load();
+
+  player.ready(()=>{
+    player.play().catch(()=>{});
+  });
+
+  highlight();
+}
+
+// auto next
+player.on('ended',()=>{
+  index=(index+1)%channels.length;
+  play(index);
+});
+
+// clock
+setInterval(()=>{
+  const d=new Date();
+  let h=d.getHours();
+  let m=d.getMinutes();
+  const ap=h>=12?'PM':'AM';
+  h=h%12||12;
+  if(m<10)m='0'+m;
+  clock.innerText=h+':'+m+' '+ap;
+},1000);
+
+// timeline
+player.on('timeupdate',()=>{
+  if(player.duration()){
+    timeline.style.width=(player.currentTime()/player.duration()*100)+'%';
   }
+});
 
+// double tap
+let lastTap=0;
+player.el().addEventListener('touchend',e=>{
+  const now=Date.now();
+  if(now-lastTap<300){
+    const x=e.changedTouches[0].clientX;
+    if(x<window.innerWidth/2) player.currentTime(player.currentTime()-5);
+    else player.currentTime(player.currentTime()+5);
+  }
+  lastTap=now;
+});
+
+// start
+play(0);
+
+</script>
+
+</body>
+</html>
   let type="video/mp4";
   if(url.includes(".m3u8")){
     type="application/x-mpegURL";
