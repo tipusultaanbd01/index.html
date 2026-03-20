@@ -1,109 +1,158 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>My Video Player</title>
+<title>Tipu TV Live</title>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
 body {
-  margin: 0;
-  background: #000;
-  color: #fff;
-  font-family: Arial;
-}
-
-#player {
-  width: 100%;
-  height: 60vh;
-  background: black;
+  margin:0;
+  background:#000;
+  color:#fff;
+  font-family:sans-serif;
 }
 
 video {
-  width: 100%;
-  height: 100%;
+  width:100%;
+  height:60vh;
+  background:black;
 }
 
-#playlist {
-  padding: 10px;
-  background: #111;
+#topbar {
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:red;
+  padding:5px 10px;
+  font-size:14px;
+}
+
+#now {
+  padding:10px;
+  background:#000;
+}
+
+#list {
+  background:#111;
+  padding:10px;
 }
 
 .item {
-  padding: 10px;
-  border-bottom: 1px solid #333;
-  cursor: pointer;
+  padding:12px;
+  border-bottom:1px solid #333;
+  cursor:pointer;
 }
 
-.item:hover {
-  background: #222;
-}
-
-.active {
-  background: #444;
-}
+.item:hover { background:#222; }
+.active { background:#444; }
 </style>
+
 </head>
 
 <body>
 
-<div id="player">
-  <video id="video" controls autoplay></video>
-</div>
+<div id="topbar">🔴 LIVE TV</div>
 
-<div id="playlist"></div>
+<div id="now">Now Playing: Loading...</div>
+
+<video id="video" controls autoplay></video>
+
+<div id="list"></div>
 
 <script>
 
-const videos = [
-  {name:"RAKKHOSH Trailer",url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20.webm"},
-  {name:"Tere Mast Mast Do Nain",url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20Full%20Song.mp4"},
-  {name:"Kotha Koiyo Na",url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na.mp4"},
-  {name:"Bonolota Express",url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh.mp4"},
+// 🔥 তোমার সব ভিডিও + future m3u8 এখানে
+const channels = [
 
-  {name:"Mardaani 3 (2026)",url:"http://103.225.94.27/Infobase/hdd-3/hindi/Mardaani%203%20(2026)%201080p%20DVDRip.mp4"},
-  {name:"Border 2 (2026)",url:"http://103.225.94.27/Infobase/hdd-3/hindi/Border%202%20(2026)%20720p%20HDTS.mp4"},
-  {name:"Antarjal (2023)",url:"http://103.225.94.27/Infobase/hdd-2/Bangla/Antarjal%20(2023)%201080p%20WEBDL.mp4"}
+  {
+    name:"RAKKHOSH Trailer",
+    url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20.webm"
+  },
+
+  {
+    name:"Tere Mast Mast Do Nain",
+    url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20Full%20Song.mp4"
+  },
+
+  {
+    name:"Kotha Koiyo Na",
+    url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na.mp4"
+  },
+
+  {
+    name:"Bonolota Express",
+    url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh.mp4"
+  },
+
+  // 👉 এখানে পরে m3u8 দিলে LIVE channel হবে
+  {
+    name:"Live Channel (m3u8)",
+    url:"YOUR_LIVE_M3U8_LINK"
+  }
+
 ];
 
-const video = document.getElementById("video");
-const playlist = document.getElementById("playlist");
+const video = document.getElementById('video');
+const list = document.getElementById('list');
+const now = document.getElementById('now');
 
 let current = 0;
+let hls;
 
-// Load video
-function loadVideo(index){
+// 🔥 Play function
+function playVideo(index){
   current = index;
-  video.src = videos[index].url;
-  video.play();
 
-  document.querySelectorAll(".item").forEach(el => el.classList.remove("active"));
-  document.getElementById("item-"+index).classList.add("active");
+  if(hls) hls.destroy();
+
+  let url = channels[index].url;
+
+  if(url.includes(".m3u8") && Hls.isSupported()){
+    hls = new Hls({
+      liveSyncDurationCount: 3
+    });
+    hls.loadSource(url);
+    hls.attachMedia(video);
+  } else {
+    video.src = url;
+  }
+
+  now.innerText = "Now Playing: " + channels[index].name;
+
+  document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
+  document.getElementById('item-'+index).classList.add('active');
+
+  video.play();
 }
 
-// Auto next
-video.onended = function(){
-  current++;
-  if(current >= videos.length) current = 0;
-  loadVideo(current);
-};
+// 🔥 Playlist UI
+channels.forEach((c,i)=>{
+  let div = document.createElement('div');
+  div.className = 'item';
+  div.id = 'item-'+i;
+  div.innerText = c.name;
 
-// Create playlist
-videos.forEach((v,i)=>{
-  const div = document.createElement("div");
-  div.className = "item";
-  div.id = "item-"+i;
-  div.innerText = v.name;
+  div.onclick = ()=>playVideo(i);
 
-  div.onclick = ()=> loadVideo(i);
-
-  playlist.appendChild(div);
+  list.appendChild(div);
 });
 
-// Start first video
-loadVideo(0);
+// 🔥 Auto Next (MP4 এর জন্য)
+video.onended = ()=>{
+  current++;
+  if(current >= channels.length) current = 0;
+  playVideo(current);
+};
+
+// 🔥 Start
+playVideo(0);
 
 </script>
 
+</body>
+</html>
 </body>
 </html>index=(index+1)%channels.length;
 play(index);
