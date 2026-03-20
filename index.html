@@ -2,9 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Tipu TV Live</title>
-
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<title>Tipu TV</title>
 
 <style>
 body {
@@ -20,78 +18,75 @@ video {
   background:black;
 }
 
-#topbar {
-  position:absolute;
-  top:10px;
-  left:10px;
-  background:red;
-  padding:5px 10px;
-  font-size:14px;
-}
-
+/* Clean Top */
 #now {
-  padding:10px;
-  background:#000;
+  padding:12px;
+  font-size:16px;
+  background:#111;
 }
 
+/* Playlist hidden style */
 #list {
+  position:fixed;
+  bottom:0;
+  width:100%;
   background:#111;
-  padding:10px;
+  max-height:200px;
+  overflow:auto;
+  transition:0.3s;
 }
 
 .item {
-  padding:12px;
+  padding:10px;
   border-bottom:1px solid #333;
   cursor:pointer;
 }
 
-.item:hover { background:#222; }
-.active { background:#444; }
+.item:hover {background:#222;}
+.active {background:#444;}
+
+/* Toggle button */
+#toggle {
+  position:fixed;
+  bottom:210px;
+  right:10px;
+  background:red;
+  padding:8px;
+  cursor:pointer;
+}
 </style>
 
 </head>
 
 <body>
 
-<div id="topbar">🔴 LIVE TV</div>
-
-<div id="now">Now Playing: Loading...</div>
+<div id="now">Now Playing...</div>
 
 <video id="video" controls autoplay></video>
+
+<div id="toggle">☰</div>
 
 <div id="list"></div>
 
 <script>
 
-// 🔥 তোমার সব ভিডিও + future m3u8 এখানে
 const channels = [
-
   {
     name:"RAKKHOSH Trailer",
     url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20.webm"
   },
-
   {
     name:"Tere Mast Mast Do Nain",
     url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20Full%20Song.mp4"
   },
-
   {
     name:"Kotha Koiyo Na",
     url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na.mp4"
   },
-
   {
     name:"Bonolota Express",
     url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh.mp4"
-  },
-
-  // 👉 এখানে পরে m3u8 দিলে LIVE channel হবে
-  {
-    name:"Live Channel (m3u8)",
-    url:"YOUR_LIVE_M3U8_LINK"
   }
-
 ];
 
 const video = document.getElementById('video');
@@ -99,11 +94,50 @@ const list = document.getElementById('list');
 const now = document.getElementById('now');
 
 let current = 0;
-let hls;
 
-// 🔥 Play function
+// play
 function playVideo(index){
   current = index;
+  video.src = channels[index].url;
+  video.play();
+
+  now.innerText = "Now Playing: " + channels[index].name;
+
+  document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
+  document.getElementById('item-'+index).classList.add('active');
+}
+
+// list
+channels.forEach((c,i)=>{
+  let div = document.createElement('div');
+  div.className = 'item';
+  div.id = 'item-'+i;
+  div.innerText = c.name;
+  div.onclick = ()=>playVideo(i);
+  list.appendChild(div);
+});
+
+// auto next
+video.onended = ()=>{
+  current++;
+  if(current >= channels.length) current = 0;
+  playVideo(current);
+};
+
+// toggle playlist
+let show = true;
+document.getElementById("toggle").onclick = ()=>{
+  show = !show;
+  list.style.display = show ? "block" : "none";
+};
+
+// start
+playVideo(0);
+
+</script>
+
+</body>
+</html>  current = index;
 
   if(hls) hls.destroy();
 
