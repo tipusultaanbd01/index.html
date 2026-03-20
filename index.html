@@ -2,110 +2,73 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SultaN Hit's Player</title>
-
+<title>SultaN Hit's Ultra TV Player</title>
 <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet"/>
-
 <style>
-body{
-  margin:0;
-  background:#000;
-  font-family:sans-serif;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-}
-
-/* VIDEO */
-#video-container{
-  height:60vh;
-  position:relative;
-}
-
-#player{
-  width:100%;
-  height:100%;
-}
-
-/* OVERLAY */
-.overlay{
-  position:absolute;
-  z-index:99999;
-  pointer-events:none;
-  font-weight:bold;
-}
-
-#logo{
-  top:10px;
-  left:10px;
-  color:red;
-  font-size:20px;
-  background:rgba(0,0,0,0.5);
-  padding:5px 10px;
-  border-radius:6px;
-}
-
-#clock{
-  top:10px;
-  right:10px;
-  color:#fff;
-  font-size:16px;
-  background:rgba(0,0,0,0.5);
-  padding:5px 10px;
-  border-radius:6px;
-}
-
-/* TIMELINE */
-#timeline-container{
-  position:absolute;
-  bottom:45px;
-  left:10px;
-  right:10px;
-  height:4px;
-  background:rgba(255,0,0,0.3);
-}
-
-#timeline{
-  height:100%;
-  width:0%;
-  background:red;
-}
-
-/* PLAYLIST */
-#playlist-container{
-  flex:1;
-  overflow-y:auto;
-  background:#000;
-}
-
-.item{
-  padding:12px;
-  color:#fff;
-  border-bottom:1px solid #333;
-  cursor:pointer;
-}
-
-.item:hover{
-  background:#111;
-}
-
-.active{
-  background:#222;
-}
+body{margin:0;background:#000;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;}
+#video-container{height:60vh;position:relative;}
+#player{width:100%;height:100%;}
+.overlay{position:absolute;z-index:99999;pointer-events:none;font-weight:bold;}
+#logo{top:10px;left:10px;color:red;font-size:20px;background:rgba(0,0,0,0.5);padding:5px 10px;border-radius:6px;}
+#clock{top:10px;right:10px;color:#fff;font-size:16px;background:rgba(0,0,0,0.5);padding:5px 10px;border-radius:6px;}
+#timeline-container{position:absolute;bottom:45px;left:10px;right:10px;height:4px;background:rgba(255,0,0,0.3);}
+#timeline{height:100%;width:0%;background:red;}
+#playlist-container{flex:1;overflow-y:auto;background:#000;}
+.item{padding:12px;color:#fff;border-bottom:1px solid #333;cursor:pointer;}
+.item:hover{background:#111;}
+.active{background:#222;}
 </style>
-
 </head>
-
 <body>
 
 <div id="video-container">
   <video id="player" class="video-js vjs-big-play-centered" controls playsinline></video>
 </div>
 
-<div id="playlist-container">
-  <div id="playlist"></div>
-</div>
+<div id="playlist-container"><div id="playlist"></div></div>
 
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/videojs-contrib-hls@5.15.0/dist/videojs-contrib-hls.min.js"></script>
+<script>
+const channels=[
+  {name:"RAKKHOSH Trailer",url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20.webm"},
+  {name:"Tere Mast Mast Do Nain",url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-720p.mp4"},
+  {name:"Kotha Koiyo Na",url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na.mp4"},
+  {name:"Bonolota Express",url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express.mp4"},
+  // Sample m3u8 live channel (future ready)
+  {name:"Live Channel Example",url:"https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8"}
+];
+
+const player=videojs('player');
+
+// overlays
+const logo=document.createElement('div');logo.id="logo";logo.className="overlay";logo.innerText="SultaN Hit's";
+const clock=document.createElement('div');clock.id="clock";clock.className="overlay";
+const timelineBox=document.createElement('div');timelineBox.id="timeline-container";
+const timeline=document.createElement('div');timeline.id="timeline";timelineBox.appendChild(timeline);
+player.ready(()=>{const el=player.el();el.appendChild(logo);el.appendChild(clock);el.appendChild(timelineBox);});
+
+// playlist
+const playlist=document.getElementById('playlist');let index=0;
+channels.forEach((c,i)=>{const div=document.createElement('div');div.className='item';div.innerText=(i+1)+". "+c.name;div.onclick=()=>play(i);playlist.appendChild(div);});
+function highlight(){document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));playlist.children[index].classList.add('active');}
+function play(i){index=i;player.src({src:channels[i].url,type:channels[i].url.includes(".m3u8")?"application/x-mpegURL":"video/mp4"});player.play();highlight();}
+player.on('ended',()=>{index=(index+1)%channels.length;play(index);});
+
+// clock
+setInterval(()=>{const d=new Date();let h=d.getHours();let m=d.getMinutes();const ap=h>=12?'PM':'AM';h=h%12||12;if(m<10)m='0'+m;clock.innerText=h+':'+m+' '+ap;},1000);
+
+// timeline
+player.on('timeupdate',()=>{if(player.duration()){timeline.style.width=(player.currentTime()/player.duration()*100)+'%';}});
+
+// double tap 5s
+let lastTap=0;player.el().addEventListener('touchend',e=>{const now=Date.now();if(now-lastTap<300){const x=e.changedTouches[0].clientX;if(x<window.innerWidth/2)player.currentTime(player.currentTime()-5);else player.currentTime(player.currentTime()+5);}lastTap=now;});
+
+// start
+play(0);
+</script>
+</body>
+</html>
 <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
 
 <script>
