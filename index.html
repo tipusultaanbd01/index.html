@@ -4,22 +4,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>°ভান্ডারি টিভি°</title>
 
+<!-- Video.js -->
+<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+
 <style>
 body{
   margin:0;
   background:#000;
-  color:#fff;
-  font-family:sans-serif;
   overflow:hidden;
+  font-family:sans-serif;
 }
 
-video{
+/* Player Fullscreen */
+.video-js{
   width:100%;
   height:100vh;
-  object-fit:cover;
 }
 
-/* 📺 Channel Name */
+/* Channel Name */
 #channelName{
   position:absolute;
   top:15px;
@@ -29,9 +32,10 @@ video{
   font-size:16px;
   font-weight:bold;
   border-radius:5px;
+  z-index:999;
 }
 
-/* ⏰ Clock */
+/* Clock */
 #clock{
   position:absolute;
   top:15px;
@@ -40,6 +44,7 @@ video{
   padding:6px 12px;
   font-size:16px;
   border-radius:5px;
+  z-index:999;
 }
 </style>
 </head>
@@ -49,7 +54,7 @@ video{
 <div id="channelName">°ভান্ডারি টিভি°</div>
 <div id="clock"></div>
 
-<video id="player" autoplay muted playsinline></video>
+<video id="player" class="video-js vjs-default-skin" controls autoplay muted playsinline></video>
 
 <script>
 const videos = [
@@ -58,57 +63,58 @@ const videos = [
   "http://103.225.94.27/Infobase/hdd-2/Bangla/Antarjal%20(2023)%201080p%20WEBDL.mp4"
 ];
 
-const player = document.getElementById("player");
+const player = videojs('player', {
+  autoplay: true,
+  controls: true,
+  preload: 'auto'
+});
 
-// ⏱️ Live Sync System
+// ⏱️ Live Sync
 function getCurrentVideo() {
   const now = Math.floor(Date.now() / 1000);
   const duration = 3600;
-
   const index = Math.floor(now / duration) % videos.length;
   const startTime = now % duration;
-
   return { index, startTime };
 }
 
 function playLive() {
   const data = getCurrentVideo();
 
-  player.src = videos[data.index];
+  player.src({
+    src: videos[data.index],
+    type: "video/mp4"
+  });
 
-  player.onloadedmetadata = () => {
-    player.currentTime = data.startTime;
+  player.ready(() => {
+    player.currentTime(data.startTime);
     player.play();
-  };
+  });
 
-  player.onended = () => {
+  player.on('ended', () => {
     playLive();
-  };
+  });
 }
 
-// 🔁 Auto Sync Fix
+// Sync Fix
 setInterval(() => {
   const data = getCurrentVideo();
-  if (Math.abs(player.currentTime - data.startTime) > 5) {
-    player.currentTime = data.startTime;
+  if (Math.abs(player.currentTime() - data.startTime) > 5) {
+    player.currentTime(data.startTime);
   }
 }, 30000);
 
-// ⏰ Clock Function
+// ⏰ Clock
 function updateClock(){
   const now = new Date();
-  let h = now.getHours();
-  let m = now.getMinutes();
-  let s = now.getSeconds();
-
-  h = h < 10 ? "0" + h : h;
-  m = m < 10 ? "0" + m : m;
-  s = s < 10 ? "0" + s : s;
+  let h = String(now.getHours()).padStart(2,'0');
+  let m = String(now.getMinutes()).padStart(2,'0');
+  let s = String(now.getSeconds()).padStart(2,'0');
 
   document.getElementById("clock").innerText = h + ":" + m + ":" + s;
 }
 
-setInterval(updateClock, 1000);
+setInterval(updateClock,1000);
 
 playLive();
 updateClock();
