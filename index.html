@@ -1,109 +1,157 @@
-<!DOCTYPE html>  <html>  
-<head>  
-<meta name="viewport" content="width=device-width, initial-scale=1.0">  
-<style>  
-body{  
-  margin:0;  
-  background:#000;  
-  overflow:hidden;  
-  font-family:sans-serif;  
-}  
-/* Video */  
-video{  
-  width:100%;  
-  height:100vh;  
-  object-fit:contain;  
-  background:#000;  
-}  
-/* Logo */  
-#logo{  
-  position:fixed;  
-  top:10px;  
-  left:15px;  
-  color:#00ffe5;  
-  font-size:26px;  
-  font-weight:bold;  
-  background:rgba(0,0,0,0.6);  
-  padding:6px 12px;  
-  border-radius:6px;  
-  z-index:10;  
-}  
-/* Clock */  
-#clock{  
-  position:fixed;  
-  top:10px;  
-  right:15px;  
-  color:white;  
-  font-size:22px;  
-  background:rgba(0,0,0,0.6);  
-  padding:6px 12px;  
-  border-radius:6px;  
-  z-index:10;  
-}  
-/* Loading Spinner */  
-#loader{  
-  position:absolute;  
-  top:50%;  
-  left:50%;  
-  transform:translate(-50%,-50%);  
-  border:6px solid #333;  
-  border-top:6px solid white;  
-  border-radius:50%;  
-  width:50px;  
-  height:50px;  
-  animation:spin 1s linear infinite;  
-}  
-@keyframes spin{  
-  0%{transform:translate(-50%,-50%) rotate(0deg)}  
-  100%{transform:translate(-50%,-50%) rotate(360deg)}  
-}  
-</style>  
-</head>  
-<body>  
-<div id="logo">Boom TV</div>  
-<div id="clock"></div>  
-<div id="loader"></div>  
-<video id="player" autoplay playsinline></video>  
-<script>  
-// ভিডিও লিস্ট  
-const videos=[  
-  {  
-    src:"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",  
-    duration:250  
-  },  
-  {  
-    src:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4",  
-    duration:240  
-  }  
-]  
-const player=document.getElementById("player")  
-let totalDuration=0  
-videos.forEach(v=> totalDuration+=v.duration)  
-// ভিডিও সিঙ্ক ফাংশন  
-function startChannel(){  
-  let now=Math.floor(Date.now()/1000)  
-  let position=now%totalDuration  
-  let currentVideo=0  
-  let time=position  
-  for(let i=0;i<videos.length;i++){  
-    if(time<videos[i].duration){  
-      currentVideo=i  
-      break  
-    }  
-    time-=videos[i].duration  
-  }  
-  // ভিডিও লোড  
-  if(player.src!==videos[currentVideo].src){  
-    player.src=videos[currentVideo].src  
-    document.getElementById("loader").style.display="block"  
-  }  
-  player.onloadedmetadata=()=>{  
-    player.currentTime=time  
-    document.getElementById("loader").style.display="none"  
-    player.play()  
-  }  
-}  
-// প্রতি 30 সেকেন্ডে ভিডিও চেক করে সিঙ্ক  
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+body{
+  margin:0;
+  background:#000;
+  overflow:hidden;
+  font-family:sans-serif;
+}
+
+/* Video */
+video{
+  width:100%;
+  height:100vh;
+  object-fit:contain;
+  background:#000;
+}
+
+/* Logo */
+#logo{
+  position:fixed;
+  top:10px;
+  left:15px;
+  color:#00ffe5;
+  font-size:26px;
+  font-weight:bold;
+  background:rgba(0,0,0,0.6);
+  padding:6px 12px;
+  border-radius:6px;
+  z-index:10;
+}
+
+/* Clock */
+#clock{
+  position:fixed;
+  top:10px;
+  right:15px;
+  color:white;
+  font-size:22px;
+  background:rgba(0,0,0,0.6);
+  padding:6px 12px;
+  border-radius:6px;
+  z-index:10;
+}
+
+/* Loading Spinner */
+#loader{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  border:6px solid #333;
+  border-top:6px solid white;
+  border-radius:50%;
+  width:50px;
+  height:50px;
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+  0%{transform:translate(-50%,-50%) rotate(0deg)}
+  100%{transform:translate(-50%,-50%) rotate(360deg)}
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="logo">Boom TV</div>
+<div id="clock"></div>
+<div id="loader"></div>
+
+<video id="player" autoplay playsinline></video>
+
+<script>
+
+// ভিডিও লিস্ট
+const videos=[
+  {
+    src:"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",
+    duration:250
+  },
+  {
+    src:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4",
+    duration:240
+  }
+]
+
+const player=document.getElementById("player")
+let totalDuration=0
+videos.forEach(v=> totalDuration+=v.duration)
+
+// ভিডিও সিঙ্ক ফাংশন
+function startChannel(){
+  let now=Math.floor(Date.now()/1000)
+  let position=now%totalDuration
+  let currentVideo=0
+  let time=position
+
+  for(let i=0;i<videos.length;i++){
+    if(time<videos[i].duration){
+      currentVideo=i
+      break
+    }
+    time-=videos[i].duration
+  }
+
+  // ভিডিও লোড
+  if(player.src!==videos[currentVideo].src){
+    player.src=videos[currentVideo].src
+    document.getElementById("loader").style.display="block"
+  }
+
+  player.onloadedmetadata=()=>{
+    player.currentTime=time
+    document.getElementById("loader").style.display="none"
+    player.play()
+  }
+}
+
+// প্রতি 30 সেকেন্ডে ভিডিও চেক করে সিঙ্ক
+startChannel()
+setInterval(startChannel,30000)
+
+// Clock
+function updateClock(){
+  const now=new Date()
+  let h=now.getHours()
+  let m=now.getMinutes()
+  let s=now.getSeconds()
+  if(h<10) h="0"+h
+  if(m<10) m="0"+m
+  if(s<10) s="0"+s
+  document.getElementById("clock").innerText=h+":"+m+":"+s
+}
+
+setInterval(updateClock,1000)
+updateClock()
+
+// Auto fullscreen
+document.body.onclick=function(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen()
+  }
+}
+
+</script>
+
+</body>
+</html>// প্রতি 30 সেকেন্ডে ভিডিও চেক করে সিঙ্ক  
 startChannel()  
 setInterval(startChannel,30000)  
 // Clock  
