@@ -2,633 +2,116 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
+<title>°ভান্ডারি টিভি°</title>
 
+<style>
 body{
   margin:0;
   background:#000;
-  overflow:hidden;
+  color:#fff;
   font-family:sans-serif;
+  overflow:hidden;
 }
 
-/* Video */
 video{
   width:100%;
   height:100vh;
-  object-fit:contain;
-  background:#000;
+  object-fit:cover;
 }
 
-/* Logo */
-#logo{
-  position:fixed;
-  top:10px;
-  left:15px;
-  color:#00ffe5;
-  font-size:26px;
-  font-weight:bold;
-  background:rgba(0,0,0,0.6);
-  padding:6px 12px;
-  border-radius:6px;
-  z-index:10;
-}
-
-/* Clock */
-#clock{
-  position:fixed;
-  top:10px;
-  right:15px;
-  color:white;
-  font-size:22px;
-  background:rgba(0,0,0,0.6);
-  padding:6px 12px;
-  border-radius:6px;
-  z-index:10;
-}
-
-/* Loading Spinner */
-#loader{
+/* 📺 Channel Name */
+#channelName{
   position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  border:6px solid #333;
-  border-top:6px solid white;
-  border-radius:50%;
-  width:50px;
-  height:50px;
-  animation:spin 1s linear infinite;
+  top:15px;
+  left:15px;
+  background:red;
+  padding:6px 12px;
+  font-size:16px;
+  font-weight:bold;
+  border-radius:5px;
 }
 
-@keyframes spin{
-  0%{transform:translate(-50%,-50%) rotate(0deg)}
-  100%{transform:translate(-50%,-50%) rotate(360deg)}
+/* ⏰ Clock */
+#clock{
+  position:absolute;
+  top:15px;
+  right:15px;
+  background:rgba(0,0,0,0.6);
+  padding:6px 12px;
+  font-size:16px;
+  border-radius:5px;
 }
-
 </style>
 </head>
 
 <body>
 
-<div id="logo">Boom TV</div>
+<div id="channelName">°ভান্ডারি টিভি°</div>
 <div id="clock"></div>
-<div id="loader"></div>
 
-<video id="player" autoplay playsinline></video>
+<video id="player" autoplay muted playsinline></video>
 
 <script>
+const videos = [
+  "http://103.225.94.27/Infobase/hdd-3/hindi/Mardaani%203%20(2026)%201080p%20DVDRip.mp4",
+  "http://103.225.94.27/Infobase/hdd-3/hindi/Border%202%20(2026)%20Hindi%20720p%20HDTS%20x264%20%5bDDN%5d.mp4",
+  "http://103.225.94.27/Infobase/hdd-2/Bangla/Antarjal%20(2023)%201080p%20WEBDL.mp4"
+];
 
-// ভিডিও লিস্ট
-const videos=[
-  {
-    src:"https://ia600407.us.archive.org/5/items/sab-kuchh-bhula-diya-lyrical-video-hum-tumhare-hain-sanam-sonu-n-sapna-a-shahrukh-khan-madhuri-d/Sab%20Kuchh%20Bhula%20Diya%20Lyrical%20Video%20_%20Hum%20Tumhare%20Hain%20Sanam%20_%20Sonu%20N%2CSapna%20A_Shahrukh%20Khan%2CMadhuri%20D.mp4",
-    duration:250
-  },
-  {
-    src:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4",
-    duration:240
-  }
-]
+const player = document.getElementById("player");
 
-const player=document.getElementById("player")
-let totalDuration=0
-videos.forEach(v=> totalDuration+=v.duration)
+// ⏱️ Live Sync System
+function getCurrentVideo() {
+  const now = Math.floor(Date.now() / 1000);
+  const duration = 3600;
 
-// ভিডিও সিঙ্ক ফাংশন
-function startChannel(){
-  let now=Math.floor(Date.now()/1000)
-  let position=now%totalDuration
-  let currentVideo=0
-  let time=position
+  const index = Math.floor(now / duration) % videos.length;
+  const startTime = now % duration;
 
-  for(let i=0;i<videos.length;i++){
-    if(time<videos[i].duration){
-      currentVideo=i
-      break
-    }
-    time-=videos[i].duration
-  }
-
-  // ভিডিও লোড
-  if(player.src!==videos[currentVideo].src){
-    player.src=videos[currentVideo].src
-    document.getElementById("loader").style.display="block"
-  }
-
-  player.onloadedmetadata=()=>{
-    player.currentTime=time
-    document.getElementById("loader").style.display="none"
-    player.play()
-  }
+  return { index, startTime };
 }
 
-// প্রতি 30 সেকেন্ডে ভিডিও চেক করে সিঙ্ক
-startChannel()
-setInterval(startChannel,30000)
+function playLive() {
+  const data = getCurrentVideo();
 
-// Clock
+  player.src = videos[data.index];
+
+  player.onloadedmetadata = () => {
+    player.currentTime = data.startTime;
+    player.play();
+  };
+
+  player.onended = () => {
+    playLive();
+  };
+}
+
+// 🔁 Auto Sync Fix
+setInterval(() => {
+  const data = getCurrentVideo();
+  if (Math.abs(player.currentTime - data.startTime) > 5) {
+    player.currentTime = data.startTime;
+  }
+}, 30000);
+
+// ⏰ Clock Function
 function updateClock(){
-  const now=new Date()
-  let h=now.getHours()
-  let m=now.getMinutes()
-  let s=now.getSeconds()
-  if(h<10) h="0"+h
-  if(m<10) m="0"+m
-  if(s<10) s="0"+s
-  document.getElementById("clock").innerText=h+":"+m+":"+s
+  const now = new Date();
+  let h = now.getHours();
+  let m = now.getMinutes();
+  let s = now.getSeconds();
+
+  h = h < 10 ? "0" + h : h;
+  m = m < 10 ? "0" + m : m;
+  s = s < 10 ? "0" + s : s;
+
+  document.getElementById("clock").innerText = h + ":" + m + ":" + s;
 }
 
-setInterval(updateClock,1000)
-updateClock()
+setInterval(updateClock, 1000);
 
-// Auto fullscreen
-document.body.onclick=function(){
-  if(!document.fullscreenElement){
-    document.documentElement.requestFullscreen()
-  }
-}
-
-</script>
-
-</body>
-</html>// প্রতি 30 সেকেন্ডে ভিডিও চেক করে সিঙ্ক  
-startChannel()  
-setInterval(startChannel,30000)  
-// Clock  
-function updateClock(){  
-  const now=new Date()  
-  let h=now.getHours()  
-  let m=now.getMinutes()  
-  let s=now.getSeconds()  
-  if(h<10) h="0"+h  
-  if(m<10) m="0"+m  
-  if(s<10) s="0"+s  
-  document.getElementById("clock").innerText=h+":"+m+":"+s  
-}  
-setInterval(updateClock,1000)  
-updateClock()  
-// Auto fullscreen  
-document.body.onclick=function(){  
-  if(!document.fullscreenElement){  
-    document.documentElement.requestFullscreen()  
-  }  
-}  
-</script>  
-</body>  
-</html>    document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
-  document.getElementById('item-'+index).classList.add('active');
-}
-
-// list
-channels.forEach((c,i)=>{
-  let div = document.createElement('div');
-  div.className = 'item';
-  div.id = 'item-'+i;
-  div.innerText = c.name;
-  div.onclick = ()=>playVideo(i);
-  list.appendChild(div);
-});
-
-// auto next
-video.onended = ()=>{
-  current++;
-  if(current >= channels.length) current = 0;
-  playVideo(current);
-};
-
-// toggle playlist
-let show = true;
-document.getElementById("toggle").onclick = ()=>{
-  show = !show;
-  list.style.display = show ? "block" : "none";
-};
-
-// start
-playVideo(0);
-
-</script>
-
-</body>
-</html>  current = index;
-
-  if(hls) hls.destroy();
-
-  let url = channels[index].url;
-
-  if(url.includes(".m3u8") && Hls.isSupported()){
-    hls = new Hls({
-      liveSyncDurationCount: 3
-    });
-    hls.loadSource(url);
-    hls.attachMedia(video);
-  } else {
-    video.src = url;
-  }
-
-  now.innerText = "Now Playing: " + channels[index].name;
-
-  document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
-  document.getElementById('item-'+index).classList.add('active');
-
-  video.play();
-}
-
-// 🔥 Playlist UI
-channels.forEach((c,i)=>{
-  let div = document.createElement('div');
-  div.className = 'item';
-  div.id = 'item-'+i;
-  div.innerText = c.name;
-
-  div.onclick = ()=>playVideo(i);
-
-  list.appendChild(div);
-});
-
-// 🔥 Auto Next (MP4 এর জন্য)
-video.onended = ()=>{
-  current++;
-  if(current >= channels.length) current = 0;
-  playVideo(current);
-};
-
-// 🔥 Start
-playVideo(0);
-
-</script>
-
-</body>
-</html>
-</body>
-</html>index=(index+1)%channels.length;
-play(index);
-}
-
-video.onended=next;
-
-// clock
-setInterval(()=>{
-const d=new Date();
-let h=d.getHours();
-let m=d.getMinutes();
-const ap=h>=12?'PM':'AM';
-h=h%12||12;
-if(m<10)m='0'+m;
-document.getElementById("clock").innerText=h+":"+m+" "+ap;
-},1000);
-
-// start
-play(0);
-</script>
-
-</body>
-</html><script>
-const video=document.getElementById("video");
-const playlist=document.getElementById("playlist");
-
-let hls;
-let index=0;
-
-const channels=[
-
-// ✅ working test
-{name:"Test Video",url:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"},
-{name:"Live Test",url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"},
-
-// 🔻 তোমার লিংক
-{name:"RAKKHOSH",url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH.webm"},
-{name:"Tere Mast",url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain.mp4"},
-{name:"Kotha Koiyo Na",url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2/Kotha%20Koiyo%20Na.mp4"},
-{name:"Bonolota",url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express/Bonolota.mp4"}
-
-];
-
-// playlist UI
-channels.forEach((c,i)=>{
-let div=document.createElement("div");
-div.className="item";
-div.innerText=(i+1)+". "+c.name;
-div.onclick=()=>play(i);
-playlist.appendChild(div);
-});
-
-function highlight(){
-document.querySelectorAll(".item").forEach(e=>e.classList.remove("active"));
-playlist.children[index].classList.add("active");
-}
-
-function play(i){
-index=i;
-highlight();
-
-if(hls){hls.destroy();}
-
-const url=channels[i].url;
-
-// m3u8
-if(url.includes(".m3u8")){
-if(Hls.isSupported()){
-hls=new Hls();
-hls.loadSource(url);
-hls.attachMedia(video);
-hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play());
-}else{
-video.src=url;
-video.play();
-}
-}else{
-video.src=url;
-video.play();
-}
-}
-
-// auto next
-video.onended=()=>{
-index=(index+1)%channels.length;
-play(index);
-};
-
-// timeline
-video.ontimeupdate=()=>{
-if(video.duration){
-document.getElementById("timeline").style.width=
-(video.currentTime/video.duration*100)+"%";
-}
-};
-
-// clock
-setInterval(()=>{
-const d=new Date();
-let h=d.getHours();
-let m=d.getMinutes();
-const ap=h>=12?'PM':'AM';
-h=h%12||12;
-if(m<10)m='0'+m;
-document.getElementById("clock").innerText=h+":"+m+" "+ap;
-},1000);
-
-// double tap
-let lastTap=0;
-video.addEventListener("touchend",e=>{
-const now=Date.now();
-if(now-lastTap<300){
-const x=e.changedTouches[0].clientX;
-if(x<window.innerWidth/2){
-video.currentTime-=5;
-}else{
-video.currentTime+=5;
-}
-}
-lastTap=now;
-});
-
-// start
-play(0);
-</script>
-
-</body>
-</html></html>},
-{
-name:"Tere Mast Mast Do Nain",
-url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/video.mp4"
-},
-{
-name:"Kotha Koiyo Na",
-url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2/video.mp4"
-},
-{
-name:"LIVE DEMO (m3u8)",
-url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
-}
-];
-
-let index=0;
-let hls;
-
-// playlist UI
-channels.forEach((c,i)=>{
-const div=document.createElement("div");
-div.className="item";
-div.innerText=(i+1)+". "+c.name;
-div.onclick=()=>play(i);
-playlist.appendChild(div);
-});
-
-function highlight(){
-document.querySelectorAll(".item").forEach(e=>e.classList.remove("active"));
-playlist.children[index].classList.add("active");
-}
-
-// 🔥 UNIVERSAL PLAY FUNCTION
-function play(i){
-index=i;
-const url=channels[i].url;
-
-// destroy old hls
-if(hls){
-hls.destroy();
-hls=null;
-}
-
-// M3U8
-if(url.includes(".m3u8")){
-if(Hls.isSupported()){
-hls=new Hls();
-hls.loadSource(url);
-hls.attachMedia(video);
-hls.on(Hls.Events.MANIFEST_PARSED,()=>{
-video.play();
-});
-}else if(video.canPlayType('application/vnd.apple.mpegurl')){
-video.src=url;
-video.play();
-}
-}else{
-// normal video
-video.src=url;
-video.play();
-}
-
-highlight();
-}
-
-// auto next
-video.onended=()=>{
-index=(index+1)%channels.length;
-play(index);
-};
-
-// clock
-setInterval(()=>{
-const d=new Date();
-let h=d.getHours();
-let m=d.getMinutes();
-const ap=h>=12?'PM':'AM';
-h=h%12||12;
-if(m<10)m='0'+m;
-document.getElementById("clock").innerText=h+":"+m+" "+ap;
-},1000);
-
-// timeline
-video.ontimeupdate=()=>{
-if(video.duration){
-document.getElementById("timeline").style.width=
-(video.currentTime/video.duration*100)+"%";
-}
-};
-
-// double tap
-let lastTap=0;
-video.addEventListener("touchend",e=>{
-const now=Date.now();
-if(now-lastTap<300){
-const x=e.changedTouches[0].clientX;
-if(x<window.innerWidth/2){
-video.currentTime-=5;
-}else{
-video.currentTime+=5;
-}
-}
-lastTap=now;
-});
-
-// start
-play(0);
-</script>
-
-</body>
-</html>url:"https://ia601904.us.archive.org/5/items/real-energy-production-rakkhosh-official-trailer-siam-susmita-eid-ul-fitr-2026-r/Real%20Energy%20Production%20-%20RAKKHOSH%20%EF%BD%9C%20%E0%A6%95%E0%A7%8B%E0%A6%AA%20%E0%A6%B6%E0%A7%81%E0%A6%B0%E0%A7%81%20%EF%BD%9C%20OFFICIAL%20TRAILER%20%EF%BD%9C%20SIAM%20%EF%BD%9C%20SUSMITA%20%EF%BD%9C%20EID%20UL%20FITR%202026%20%EF%BD%9C%20REAL%20ENERGY%20PRODUCTION%20.webm"
-},
-{
-name:"Tere Mast Mast Do Nain",
-url:"https://ia601502.us.archive.org/21/items/save-tube.io-tere-mast-mast-do-nain-with-lyrics-full-song-dabangg-salman-khan-720p_202603/SaveTube.io-_Tere%20Mast%20Mast%20Do%20Nain_%20%28%20With%20Lyrics%29%20Full%20Song%20Dabangg%20_%20Salman%20Khan%28720p%29.mp4"
-},
-{
-name:"Kotha Koiyo Na",
-url:"https://ia600706.us.archive.org/4/items/kotha-koiyo-na-coke-studio-bangla-season-2-shiblu-mredha-x-aleya-begum-x-emon-chowdhury/Kotha%20Koiyo%20Na%20_%20Coke%20Studio%20Bangla%20_%20Season%202%20_%20Shiblu%20Mredha%20X%20Aleya%20Begum%20X%20Emon%20Chowdhury.mp4"
-},
-{
-name:"Bonolota Express",
-url:"https://ia601400.us.archive.org/16/items/hoichoi-bangladesh-official-trailer-bonolota-express-mosharraf-k-chanchal-c-in-t_202603/Hoichoi%20Bangladesh%20-%20Official%20Trailer%20-%20Bonolota%20Express%20%EF%BD%9C%20Mosharraf%20K%20%EF%BD%9C%20Chanchal%20C%20%EF%BD%9C%20In%20Theatres%20this%20Eid-Ul-Fitr.mp4"
-},
-{ name:"Mardaani 3 (2026)",
-url:"http://103.225.94.27/Infobase/hdd-3/hindi/Mardaani%203%20(2026)%201080p%20DVDRip.mp4"
-},
-{ name:"Border 2 (2026)",
-url:"http://103.225.94.27/Infobase/hdd-3/hindi/Border%202%20(2026)%20Hindi%20720p%20HDTS%20x264%20%5bDDN%5d.mp4"
-},
-{ name:"Antarjal (2023)",
-url:"http://103.225.94.27/Infobase/hdd-2/Bangla/Antarjal%20(2023)%201080p%20WEBDL.mp4"
-}
-];
-
-const player = videojs('player',{
-fluid:true,
-autoplay:false,
-controls:true
-});
-
-const playlist=document.getElementById('playlist');
-let index=0;
-
-// overlay
-const logo=document.createElement('div');
-logo.id="logo";
-logo.className="overlay";
-logo.innerText="SultaN Hit's";
-
-const clock=document.createElement('div');
-clock.id="clock";
-clock.className="overlay";
-
-const timelineBox=document.createElement('div');
-timelineBox.id="timeline-container";
-
-const timeline=document.createElement('div');
-timeline.id="timeline";
-timelineBox.appendChild(timeline);
-
-player.ready(()=>{
-const el=player.el();
-el.appendChild(logo);
-el.appendChild(clock);
-el.appendChild(timelineBox);
-});
-
-// playlist create
-channels.forEach((c,i)=>{
-const div=document.createElement('div');
-div.className='item';
-div.innerText=(i+1)+". "+c.name;
-div.onclick=()=>play(i);
-playlist.appendChild(div);
-});
-
-function highlight(){
-document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
-playlist.children[index].classList.add('active');
-}
-
-function play(i){
-index=i;
-
-let src=channels[i].url;
-
-if(src.includes(".m3u8")){
-if(Hls.isSupported()){
-const video=document.getElementById("player_html5_api");
-const hls=new Hls();
-hls.loadSource(src);
-hls.attachMedia(video);
-}else{
-player.src({src:src,type:"application/x-mpegURL"});
-}
-}else{
-player.src({src:src});
-}
-
-player.play().catch(()=>{});
-highlight();
-}
-
-// auto next
-player.on('ended',()=>{
-index=(index+1)%channels.length;
-play(index);
-});
-
-// clock
-setInterval(()=>{
-const d=new Date();
-let h=d.getHours();
-let m=d.getMinutes();
-const ap=h>=12?'PM':'AM';
-h=h%12||12;
-if(m<10)m='0'+m;
-clock.innerText=h+':'+m+' '+ap;
-},1000);
-
-// timeline
-player.on('timeupdate',()=>{
-if(player.duration()){
-timeline.style.width=(player.currentTime()/player.duration()*100)+'%';
-}
-});
-
-// double tap seek
-let lastTap=0;
-player.el().addEventListener('touchend',e=>{
-const now=Date.now();
-if(now-lastTap<300){
-const x=e.changedTouches[0].clientX;
-if(x<window.innerWidth/2) player.currentTime(player.currentTime()-5);
-else player.currentTime(player.currentTime()+5);
-}
-lastTap=now;
-});
-
-// start
-play(0);
+playLive();
+updateClock();
 </script>
 
 </body>
